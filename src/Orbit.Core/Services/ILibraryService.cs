@@ -30,4 +30,11 @@ public interface ILibraryService
 
     /// <summary>Re-evaluates a single entry's availability against the file system.</summary>
     AppAvailability Evaluate(AppEntry entry);
+
+    /// <summary>Best-effort check for an already-running instance of the entry's executable.</summary>
+    bool IsRunning(AppEntry entry);
+
+    /// <summary>Removes every entry and clears the icon cache. Irreversible –
+    /// callers must confirm with the user first.</summary>
+    Task ResetAsync(CancellationToken ct = default);
 }

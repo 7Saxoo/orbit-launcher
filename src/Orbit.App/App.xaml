@@ -1,9 +1,36 @@
-﻿<Application x:Class="Orbit.App.App"
+<Application x:Class="Orbit.App.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Orbit.App"
-             StartupUri="MainWindow.xaml">
+             xmlns:conv="clr-namespace:Orbit.App.Converters"
+             xmlns:vm="clr-namespace:Orbit.App.ViewModels"
+             xmlns:views="clr-namespace:Orbit.App.Views">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Slot 0 is replaced at runtime by ThemeManager (Light/Dark). -->
+                <ResourceDictionary Source="Resources/Themes/Dark.xaml" />
+                <ResourceDictionary Source="Resources/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <conv:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+            <conv:InverseBooleanConverter x:Key="InverseBool" />
+            <conv:StringToVisibilityConverter x:Key="StringToVisibility" />
+            <conv:IconPathToImageConverter x:Key="IconToImage" />
+            <conv:AvailabilityToTextConverter x:Key="AvailabilityToText" />
+            <conv:AvailabilityToBrushConverter x:Key="AvailabilityToBrush" />
+            <conv:EnumEqualsConverter x:Key="EnumEquals" />
+            <conv:RelativeDateConverter x:Key="RelativeDate" />
+            <conv:CountToVisibilityConverter x:Key="CountToVisibility" />
+
+            <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+                <views:HomeView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:LibraryViewModel}">
+                <views:LibraryView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                <views:SettingsView />
+            </DataTemplate>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

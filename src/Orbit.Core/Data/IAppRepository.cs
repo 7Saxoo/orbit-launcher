@@ -18,6 +18,9 @@ public interface IAppRepository
 
     Task DeleteAsync(Guid id, CancellationToken ct = default);
 
+    /// <summary>Removes every entry. Used by the "reset data" action.</summary>
+    Task DeleteAllAsync(CancellationToken ct = default);
+
     /// <summary>Atomically bumps the launch counter and last-launched timestamp.</summary>
     Task RecordLaunchAsync(Guid id, DateTimeOffset launchedAt, CancellationToken ct = default);
 }

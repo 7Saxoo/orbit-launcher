@@ -109,6 +109,15 @@ public sealed class SqliteAppRepository : IAppRepository
         _log.Information("Deleted entry {Id}", id);
     }
 
+    public async Task DeleteAllAsync(CancellationToken ct = default)
+    {
+        await using var connection = _factory.Create();
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = "DELETE FROM app_entries;";
+        var rows = await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        _log.Warning("Cleared all {Count} entries (reset)", rows);
+    }
+
     public async Task RecordLaunchAsync(Guid id, DateTimeOffset launchedAt, CancellationToken ct = default)
     {
         await using var connection = _factory.Create();

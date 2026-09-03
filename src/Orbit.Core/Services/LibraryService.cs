@@ -12,6 +12,7 @@ public sealed class LibraryService : ILibraryService
     private readonly IExecutableInspector _inspector;
     private readonly IIconService _icons;
     private readonly IProcessLauncher _launcher;
+    private readonly OrbitPaths _paths;
     private readonly ILogger _log;
 
     public LibraryService(
@@ -19,12 +20,14 @@ public sealed class LibraryService : ILibraryService
         IExecutableInspector inspector,
         IIconService icons,
         IProcessLauncher launcher,
+        OrbitPaths paths,
         ILogger log)
     {
         _repository = repository;
         _inspector = inspector;
         _icons = icons;
         _launcher = launcher;
+        _paths = paths;
         _log = log.ForContext<LibraryService>();
     }
 
@@ -136,6 +139,37 @@ public sealed class LibraryService : ILibraryService
 
     public AppAvailability Evaluate(AppEntry entry) =>
         _inspector.Evaluate(entry.ExecutablePath);
+
+    public bool IsRunning(AppEntry entry) => _launcher.IsRunning(entry);
+
+    public async Task ResetAsync(CancellationToken ct = default)
+    {
+        await _repository.DeleteAllAsync(ct).ConfigureAwait(false);
+        TryClearIconCache();
+        _log.Warning("Library reset completed");
+    }
+
+    private void TryClearIconCache()
+    {
+        try
+        {
+            if (!Directory.Exists(_paths.IconCacheDirectory))
+                return;
+
+            foreach (var file in Directory.EnumerateFiles(_paths.IconCacheDirectory, "*.png"))
+            {
+                try { File.Delete(file); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    _log.Warning(ex, "Could not delete cached icon {File}", file);
+                }
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            _log.Warning(ex, "Could not clear icon cache directory");
+        }
+    }
 
     private static string? Coalesce(string? preferred, string? fallback)
     {

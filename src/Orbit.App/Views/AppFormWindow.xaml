@@ -1,0 +1,106 @@
+<Window x:Class="Orbit.App.Views.AppFormWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Orbit.App.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance vm:AddAppViewModel}"
+        Title="{Binding Title}" Height="640" Width="560"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="{DynamicResource Brush.Window.Background}">
+    <Window.Resources>
+        <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource Text.Caption}">
+            <Setter Property="Margin" Value="0,14,0,4" />
+        </Style>
+        <Style x:Key="ErrorText" TargetType="TextBlock" BasedOn="{StaticResource Text.Caption}">
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Danger}" />
+            <Setter Property="Margin" Value="0,3,0,0" />
+        </Style>
+    </Window.Resources>
+
+    <DockPanel LastChildFill="True" Margin="24">
+        <TextBlock DockPanel.Dock="Top" Text="{Binding Title}" Style="{StaticResource Text.H1}"
+                   Margin="0,0,0,4" />
+        <TextBlock DockPanel.Dock="Top"
+                   Text="Enregistrez un fichier .exe dans votre bibliothèque. Le fichier d'origine n'est pas déplacé."
+                   Style="{StaticResource Text.Caption}" Margin="0,0,0,8" />
+
+        <!-- Actions -->
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right"
+                    Margin="0,16,0,0">
+            <Button x:Name="CancelButton" Content="Annuler" Style="{StaticResource Button.Base}"
+                    MinWidth="110" Margin="0,0,10,0" Click="OnCancel" IsCancel="True" />
+            <Button x:Name="SaveButton" Content="{Binding PrimaryActionText}"
+                    Style="{StaticResource Button.Accent}" MinWidth="130" Click="OnSave" IsDefault="True" />
+        </StackPanel>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Text="Fichier exécutable (.exe)" Style="{StaticResource FieldLabel}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Style="{StaticResource TextBox.Base}"
+                             Text="{Binding ExecutablePath, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+                    <Button Grid.Column="1" Content="Parcourir…" Style="{StaticResource Button.Base}"
+                            Margin="8,0,0,0" Command="{Binding BrowseExecutableCommand}" />
+                </Grid>
+                <TextBlock Style="{StaticResource Text.Caption}" Margin="0,3,0,0"
+                           Text="{Binding PathHint}"
+                           Visibility="{Binding PathHint, Converter={StaticResource StringToVisibility}}" />
+
+                <TextBlock Text="Nom" Style="{StaticResource FieldLabel}" />
+                <TextBox Style="{StaticResource TextBox.Base}"
+                         Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+
+                <TextBlock Text="Type" Style="{StaticResource FieldLabel}" />
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton GroupName="Kind" Content="Application" Margin="0,0,18,0"
+                                 Foreground="{DynamicResource Brush.Text.Primary}"
+                                 IsChecked="{Binding Kind, Converter={StaticResource EnumEquals}, ConverterParameter=Application}" />
+                    <RadioButton GroupName="Kind" Content="Jeu"
+                                 Foreground="{DynamicResource Brush.Text.Primary}"
+                                 IsChecked="{Binding Kind, Converter={StaticResource EnumEquals}, ConverterParameter=Game}" />
+                </StackPanel>
+
+                <TextBlock Text="Catégorie" Style="{StaticResource FieldLabel}" />
+                <ComboBox Style="{StaticResource ComboBox.Base}" IsEditable="True"
+                          ItemsSource="{Binding CategorySuggestions}"
+                          Text="{Binding Category, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Text="Arguments de ligne de commande (optionnel)" Style="{StaticResource FieldLabel}" />
+                <TextBox Style="{StaticResource TextBox.Base}"
+                         Text="{Binding Arguments, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Text="Dossier de travail (optionnel)" Style="{StaticResource FieldLabel}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Style="{StaticResource TextBox.Base}"
+                             Text="{Binding WorkingDirectory, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Grid.Column="1" Content="Parcourir…" Style="{StaticResource Button.Base}"
+                            Margin="8,0,0,0" Command="{Binding BrowseWorkingDirectoryCommand}" />
+                </Grid>
+
+                <TextBlock Text="Description (optionnel)" Style="{StaticResource FieldLabel}" />
+                <TextBox Style="{StaticResource TextBox.Base}" AcceptsReturn="True" TextWrapping="Wrap"
+                         MinHeight="64" VerticalContentAlignment="Top"
+                         Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
+
+                <CheckBox Margin="0,16,0,0" Content="Ajouter aux favoris"
+                          Foreground="{DynamicResource Brush.Text.Primary}"
+                          IsChecked="{Binding IsFavorite}" />
+
+                <TextBlock x:Name="FormError" Style="{StaticResource ErrorText}" Margin="0,14,0,0"
+                           Visibility="Collapsed"
+                           Text="Corrigez les champs en rouge avant d'enregistrer." />
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>
