@@ -26,8 +26,11 @@
                         </StackPanel>
                         <ComboBox Grid.Column="1" Width="180" Style="{StaticResource ComboBox.Base}"
                                   ItemsSource="{Binding ThemeOptions}"
-                                  SelectedItem="{Binding SelectedTheme}"
-                                  DisplayMemberPath="Label" />
+                                  SelectedItem="{Binding SelectedTheme}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate><TextBlock Text="{Binding Label}" /></DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                     </Grid>
                 </StackPanel>
             </Border>
@@ -49,8 +52,11 @@
                         </StackPanel>
                         <ComboBox Grid.Column="1" Width="180" Style="{StaticResource ComboBox.Base}"
                                   ItemsSource="{Binding SortOptions}"
-                                  SelectedItem="{Binding SelectedSort}"
-                                  DisplayMemberPath="Label" />
+                                  SelectedItem="{Binding SelectedSort}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate><TextBlock Text="{Binding Label}" /></DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                     </Grid>
 
                     <CheckBox Margin="0,14,0,0" Foreground="{DynamicResource Brush.Text.Primary}"
@@ -61,6 +67,18 @@
                         <TextBlock Text="{Binding EntryCount, StringFormat='{}{0} application(s) enregistrée(s)'}"
                                    Style="{StaticResource Text.Caption}" VerticalAlignment="Center" />
                     </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Détection automatique -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Détection automatique" Style="{StaticResource Text.H2}" />
+                    <TextBlock Style="{StaticResource Text.Caption}" Margin="0,6,0,0" TextWrapping="Wrap"
+                               Text="Recherche les jeux et applications déjà installés (Steam, Epic Games, programmes Windows) et propose de les ajouter à la bibliothèque. Vous choisissez ce qui est importé." />
+                    <Button Content="🔍  Analyser mon ordinateur" Style="{StaticResource Button.Accent}"
+                            HorizontalAlignment="Left" Margin="0,12,0,0"
+                            Command="{Binding ScanForAppsCommand}" />
                 </StackPanel>
             </Border>
 

@@ -23,6 +23,9 @@ public interface IDialogService
     /// <summary>Shows the add/edit form modally. Returns true if the user saved.</summary>
     bool ShowAppForm(AppFormViewModel viewModel);
 
+    /// <summary>Shows the auto-detection dialog modally.</summary>
+    void ShowDetection(DetectionViewModel viewModel);
+
     /// <summary>Opens Explorer with the given file selected (or the folder).</summary>
     void RevealInExplorer(string path);
 }

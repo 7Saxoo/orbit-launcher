@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Orbit.Core.Data;
+using Orbit.Core.Detection;
 using Orbit.Core.Infrastructure;
 using Orbit.Core.Services;
 
@@ -24,6 +25,12 @@ public static class OrbitCoreServiceCollectionExtensions
         services.AddSingleton<IProcessLauncher, ProcessLauncher>();
         services.AddSingleton<ISettingsService, JsonSettingsService>();
         services.AddSingleton<ILibraryService, LibraryService>();
+
+        // Installed-software detection sources + aggregator.
+        services.AddSingleton<IInstalledAppSource, RegistryUninstallSource>();
+        services.AddSingleton<IInstalledAppSource, SteamSource>();
+        services.AddSingleton<IInstalledAppSource, EpicGamesSource>();
+        services.AddSingleton<IAppDetectionService, AppDetectionService>();
 
         return services;
     }

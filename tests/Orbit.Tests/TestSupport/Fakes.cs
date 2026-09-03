@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using Orbit.Core.Data;
+using Orbit.Core.Detection;
 using Orbit.Core.Models;
 using Orbit.Core.Services;
 
@@ -77,6 +78,9 @@ public sealed class FakeExecutableInspector : IExecutableInspector
     public string? FileDescription { get; set; } = "Fake description";
     public string? CompanyName { get; set; } = "Fake Corp";
 
+    /// <summary>Paths that <see cref="Evaluate"/> should report as Missing regardless of <see cref="Exists"/>.</summary>
+    public HashSet<string> MissingPaths { get; } = new(StringComparer.OrdinalIgnoreCase);
+
     public ExecutableInfo Inspect(string path) => new()
     {
         NormalizedPath = Orbit.Core.Infrastructure.PathHelper.Normalize(path),
@@ -87,10 +91,31 @@ public sealed class FakeExecutableInspector : IExecutableInspector
         CompanyName = CompanyName
     };
 
-    public AppAvailability Evaluate(string path) =>
-        !HasExe ? AppAvailability.Invalid :
-        !Exists ? AppAvailability.Missing :
-        AppAvailability.Available;
+    public AppAvailability Evaluate(string path)
+    {
+        if (MissingPaths.Contains(Orbit.Core.Infrastructure.PathHelper.Normalize(path)))
+            return AppAvailability.Missing;
+
+        return !HasExe ? AppAvailability.Invalid :
+            !Exists ? AppAvailability.Missing :
+            AppAvailability.Available;
+    }
+}
+
+/// <summary>Returns a scripted set of detected apps.</summary>
+public sealed class FakeInstalledAppSource : IInstalledAppSource
+{
+    private readonly DetectedApp[] _apps;
+
+    public FakeInstalledAppSource(string displayName, params DetectedApp[] apps)
+    {
+        DisplayName = displayName;
+        _apps = apps;
+    }
+
+    public string DisplayName { get; }
+
+    public IEnumerable<DetectedApp> Scan(CancellationToken ct) => _apps;
 }
 
 /// <summary>Records the path it was asked about; returns a fixed result.</summary>

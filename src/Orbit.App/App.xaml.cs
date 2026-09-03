@@ -84,6 +84,10 @@ public partial class App : Application
                 services.AddSingleton<AppTileContext>();
                 services.AddSingleton<AddAppFlow>();
 
+                services.AddTransient<DetectionViewModel>();
+                services.AddSingleton<Func<DetectionViewModel>>(sp => sp.GetRequiredService<DetectionViewModel>);
+                services.AddSingleton<DetectionFlow>();
+
                 services.AddSingleton<HomeViewModel>();
                 services.AddSingleton<LibraryViewModel>();
                 services.AddSingleton<SettingsViewModel>();

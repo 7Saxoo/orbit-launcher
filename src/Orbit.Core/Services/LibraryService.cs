@@ -1,4 +1,5 @@
 using Orbit.Core.Data;
+using Orbit.Core.Detection;
 using Orbit.Core.Infrastructure;
 using Orbit.Core.Models;
 using Serilog;
@@ -80,6 +81,40 @@ public sealed class LibraryService : ILibraryService
         await _repository.AddAsync(entry, ct).ConfigureAwait(false);
         _log.Information("Added «{Name}» ({Kind}) from {Path}", entry.Name, entry.Kind, entry.ExecutablePath);
         return entry;
+    }
+
+    public async Task<int> ImportAsync(IEnumerable<DetectedApp> apps, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(apps);
+
+        var added = 0;
+        foreach (var app in apps)
+        {
+            ct.ThrowIfCancellationRequested();
+            try
+            {
+                await AddAsync(new NewAppRequest
+                {
+                    ExecutablePath = app.ExecutablePath,
+                    Name = app.Name,
+                    Kind = app.Kind,
+                    Category = app.Category,
+                    Description = app.Publisher is { } p ? $"Éditeur : {p}" : null
+                }, ct).ConfigureAwait(false);
+                added++;
+            }
+            catch (DuplicateAppException)
+            {
+                // Raced with another add, or picked twice – fine, just skip.
+            }
+            catch (ExecutableNotRegisterableException ex)
+            {
+                _log.Warning("Skipped import of {Name}: {Reason}", app.Name, ex.Message);
+            }
+        }
+
+        _log.Information("Imported {Added} detected app(s)", added);
+        return added;
     }
 
     public async Task<AppEntry> UpdateAsync(AppEntry entry, CancellationToken ct = default)

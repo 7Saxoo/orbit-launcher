@@ -1,3 +1,4 @@
+using Orbit.Core.Detection;
 using Orbit.Core.Infrastructure;
 using Orbit.Core.Models;
 using Orbit.Core.Services;
@@ -155,6 +156,38 @@ public class LibraryServiceTests
 
         Assert.Empty(_repo.Snapshot);
         Assert.Equal(1, _repo.DeleteAllCallCount);
+    }
+
+    [Fact]
+    public async Task ImportAsync_adds_new_entries_and_skips_duplicates()
+    {
+        await _service.AddAsync(Request(@"C:\Games\Existing\game.exe", "Existing"));
+
+        var detected = new[]
+        {
+            new DetectedApp { Name = "Fresh One", ExecutablePath = @"C:\Games\Fresh1\a.exe", Kind = AppKind.Game, Source = "Steam" },
+            new DetectedApp { Name = "Fresh Two", ExecutablePath = @"C:\Games\Fresh2\b.exe", Kind = AppKind.Game, Source = "Steam" },
+            new DetectedApp { Name = "Existing again", ExecutablePath = @"C:\Games\Existing\game.exe", Kind = AppKind.Game, Source = "Steam" },
+        };
+
+        var added = await _service.ImportAsync(detected);
+
+        Assert.Equal(2, added);
+        Assert.Equal(3, _repo.Snapshot.Count);
+    }
+
+    [Fact]
+    public async Task ImportAsync_skips_entries_that_do_not_exist()
+    {
+        _inspector.Exists = false; // every candidate is "missing"
+
+        var added = await _service.ImportAsync(new[]
+        {
+            new DetectedApp { Name = "Ghost", ExecutablePath = @"C:\nope\ghost.exe", Source = "Steam" }
+        });
+
+        Assert.Equal(0, added);
+        Assert.Empty(_repo.Snapshot);
     }
 
     [Fact]

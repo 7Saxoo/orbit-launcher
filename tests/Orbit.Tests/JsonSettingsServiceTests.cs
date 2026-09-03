@@ -15,7 +15,7 @@ public class JsonSettingsServiceTests
         service.Load();
 
         Assert.True(File.Exists(ws.Paths.SettingsFile));
-        Assert.Equal(ThemePreference.System, service.Current.Theme);
+        Assert.Equal(ThemePreference.Light, service.Current.Theme);
         Assert.True(service.Current.ConfirmBeforeRemove);
     }
 
@@ -52,7 +52,7 @@ public class JsonSettingsServiceTests
         var service = new JsonSettingsService(ws.Paths, Logger.None);
         service.Load();
 
-        Assert.Equal(ThemePreference.System, service.Current.Theme);
+        Assert.Equal(ThemePreference.Light, service.Current.Theme);
         var quarantined = Directory.GetFiles(ws.Paths.BaseDirectory, "settings.json.corrupt-*");
         Assert.NotEmpty(quarantined);
     }

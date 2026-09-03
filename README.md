@@ -32,6 +32,10 @@ chemin, quelques métadonnées et une icône mise en cache.
 - **Ajouter** une application ou un jeu à partir d'un fichier `.exe` choisi dans
   l'explorateur Windows ; le nom, la description et l'éditeur sont pré-remplis
   automatiquement à partir des métadonnées du fichier.
+- **Détection automatique** des jeux et applications déjà installés : analyse de
+  **Steam** (bibliothèques + manifestes), **Epic Games** (manifestes) et de la
+  **liste des programmes installés de Windows** (registre). L'utilisateur coche
+  ce qu'il veut importer ; rien n'est ajouté sans son accord.
 - **Icône automatique** : l'icône du `.exe` est extraite une seule fois, convertie
   en PNG et mise en cache. Une icône par défaut est utilisée en cas d'échec.
 - **Lancer** une application (via `ShellExecute`, sans passer par `cmd.exe`), avec
@@ -48,7 +52,9 @@ chemin, quelques métadonnées et une icône mise en cache.
   catégorie.
 - **Tri** par nom, ajout récent, nombre de lancements ou dernier lancement.
 - **Favoris**.
-- **Thème** clair / sombre / système, appliqué à chaud.
+- **Thème** clair / sombre / système, appliqué à chaud. Palette chaude
+  (terre cuite / ambre) et police **Poppins** embarquée. Le thème clair est
+  celui par défaut.
 - **Persistance locale** en SQLite : les données survivent à la fermeture, au
   redémarrage du PC et à une mise à jour de l'application.
 - **Journalisation** dans des fichiers rotatifs quotidiens.
@@ -67,7 +73,7 @@ chemin, quelques métadonnées et une icône mise en cache.
 | Icônes | `SHGetFileInfo` + `Icon.ExtractAssociatedIcon` + `System.Drawing` | Extraction native, conversion PNG, cache disque. |
 | Injection de dépendances | `Microsoft.Extensions.Hosting` / `DependencyInjection` | Composition centralisée. |
 | Journalisation | **Serilog** (`Sinks.File`, `Sinks.Debug`) | Fichiers rotatifs, format lisible. |
-| Tests | **xUnit** | 60 tests unitaires et d'intégration. |
+| Tests | **xUnit** | 81 tests unitaires et d'intégration. |
 
 ---
 
@@ -156,6 +162,8 @@ Orbit.sln
 │   │   │                           #   IAppRepository, SqliteAppRepository
 │   │   ├── Services/               # ExecutableInspector, ProcessLauncher,
 │   │   │                           #   IconService, JsonSettingsService, LibraryService
+│   │   ├── Detection/              # VdfParser, SteamCatalog/Source, EpicManifestReader/Source,
+│   │   │                           #   RegistryUninstallSource, MainExecutableFinder, AppDetectionService
 │   │   └── OrbitCoreServiceCollectionExtensions.cs
 │   │
 │   └── Orbit.App/                  # Présentation WPF (net8.0-windows)
@@ -163,11 +171,12 @@ Orbit.sln
 │       ├── MainWindow.xaml(.cs)    # Coquille : rail de navigation + contenu + barre d'état
 │       ├── Infrastructure/         # OrbitLogging, ThemeManager
 │       ├── Converters/             # Convertisseurs de binding
-│       ├── Services/               # DialogService, AddAppFlow
-│       ├── ViewModels/             # Main, Home, Library, AppTile, Settings, Add/Edit
-│       ├── Views/                  # HomeView, LibraryView, SettingsView, AppTile, AppFormWindow
+│       ├── Services/               # DialogService, AddAppFlow, DetectionFlow
+│       ├── ViewModels/             # Main, Home, Library, AppTile, Settings, Add/Edit, Detection
+│       ├── Views/                  # HomeView, LibraryView, SettingsView, AppTile,
+│       │                           #   AppFormWindow, DetectionWindow
 │       ├── Resources/              # Themes/Light.xaml, Themes/Dark.xaml, Controls.xaml
-│       └── Assets/                 # orbit.ico, default-app-icon.png
+│       └── Assets/                 # orbit.ico, default-app-icon.png, Fonts/ (Poppins)
 │
 └── tests/
     └── Orbit.Tests/               # xUnit : PathHelper, base SQLite, services, icônes, intégration
@@ -229,7 +238,7 @@ d'installation, qui peut être en lecture seule) :
 dotnet test
 ```
 
-**60 tests** (xUnit), notamment :
+**81 tests** (xUnit), notamment :
 
 - **`PathHelperTests`** — normalisation (guillemets, espaces, variables
   d'environnement, accents), comparaison de chemins insensible à la casse et au
@@ -256,7 +265,7 @@ dotnet test
   fichier → correction du chemin → lancement ; et réinitialisation qui n'altère
   jamais le `.exe` source.
 
-Résultat de la dernière exécution : **60 réussis, 0 échec**.
+Résultat de la dernière exécution : **81 réussis, 0 échec**.
 
 En complément, l'application a été **réellement démarrée** (build Release) :
 création de `orbit.db` + migration, écriture de `settings.json`, initialisation de
@@ -270,7 +279,8 @@ la coquille et arrêt propre, sans exception dans les journaux.
   registre, `System.Drawing`). Aucune portabilité macOS/Linux prévue.
 - Les métadonnées « jeu » enrichies (genre, éditeur, jaquette, temps de jeu) sont
   **présentes dans le schéma** mais **pas exposées dans l'interface** de la V1.
-- Pas encore de détection automatique des jeux installés (Steam, Epic, GOG…).
+- Détection automatique limitée à Steam, Epic Games et au registre Windows
+  (GOG, Ubisoft Connect, Xbox et le suivi du temps de jeu restent à faire).
 - Pas d'import/export de la bibliothèque.
 - L'extraction d'icône fournit une image jusqu'à 32×32 ; les icônes « jumbo »
   256×256 ne sont pas encore récupérées.

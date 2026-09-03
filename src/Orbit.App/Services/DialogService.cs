@@ -64,6 +64,16 @@ public sealed class DialogService : IDialogService
         return window.ShowDialog() == true;
     }
 
+    public void ShowDetection(DetectionViewModel viewModel)
+    {
+        var window = new DetectionWindow { DataContext = viewModel };
+        var owner = Owner;
+        if (owner is not null && !ReferenceEquals(owner, window))
+            window.Owner = owner;
+
+        window.ShowDialog();
+    }
+
     public void RevealInExplorer(string path)
     {
         try

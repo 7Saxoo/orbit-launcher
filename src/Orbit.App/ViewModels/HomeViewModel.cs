@@ -17,13 +17,20 @@ public sealed partial class HomeViewModel : ObservableObject
     private readonly ILibraryService _library;
     private readonly AppTileContext _tileContext;
     private readonly AddAppFlow _addAppFlow;
+    private readonly DetectionFlow _detectionFlow;
     private readonly ILogger _log;
 
-    public HomeViewModel(ILibraryService library, AppTileContext tileContext, AddAppFlow addAppFlow, ILogger log)
+    public HomeViewModel(
+        ILibraryService library,
+        AppTileContext tileContext,
+        AddAppFlow addAppFlow,
+        DetectionFlow detectionFlow,
+        ILogger log)
     {
         _library = library;
         _tileContext = tileContext;
         _addAppFlow = addAppFlow;
+        _detectionFlow = detectionFlow;
         _log = log.ForContext<HomeViewModel>();
     }
 
@@ -86,6 +93,17 @@ public sealed partial class HomeViewModel : ObservableObject
             return;
 
         _tileContext.Host.SetStatus($"« {entry.Name} » a été ajouté.", StatusSeverity.Success);
+        await _tileContext.Host.RefreshAllAsync().ConfigureAwait(true);
+    }
+
+    [RelayCommand]
+    private async Task ScanForAppsAsync()
+    {
+        var imported = _detectionFlow.Run();
+        if (imported <= 0)
+            return;
+
+        _tileContext.Host.SetStatus($"{imported} application(s) importée(s).", StatusSeverity.Success);
         await _tileContext.Host.RefreshAllAsync().ConfigureAwait(true);
     }
 

@@ -1,3 +1,4 @@
+using Orbit.Core.Detection;
 using Orbit.Core.Models;
 
 namespace Orbit.Core.Services;
@@ -15,6 +16,10 @@ public interface ILibraryService
     /// <exception cref="DuplicateAppException" />
     /// <exception cref="ExecutableNotRegisterableException" />
     Task<AppEntry> AddAsync(NewAppRequest request, CancellationToken ct = default);
+
+    /// <summary>Bulk-imports detected apps, skipping any that fail to register or
+    /// already exist. Returns the number actually added.</summary>
+    Task<int> ImportAsync(IEnumerable<DetectedApp> apps, CancellationToken ct = default);
 
     /// <summary>Persists edits to an existing entry, refreshing its icon if the
     /// executable path changed.</summary>

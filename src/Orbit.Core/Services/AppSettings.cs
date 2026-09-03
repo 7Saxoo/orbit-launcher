@@ -18,7 +18,8 @@ public enum LibrarySort
 /// <summary>User-facing settings, serialised to <c>settings.json</c>.</summary>
 public sealed class AppSettings
 {
-    public ThemePreference Theme { get; set; } = ThemePreference.System;
+    // Default to the light, warm look; users can switch to Dark or System.
+    public ThemePreference Theme { get; set; } = ThemePreference.Light;
 
     public LibrarySort Sort { get; set; } = LibrarySort.Name;
 

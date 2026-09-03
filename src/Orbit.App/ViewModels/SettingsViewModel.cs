@@ -18,6 +18,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly ThemeManager _themeManager;
     private readonly IDialogService _dialogs;
     private readonly ILibraryService _library;
+    private readonly DetectionFlow _detectionFlow;
     private readonly OrbitPaths _paths;
     private readonly ILogger _log;
 
@@ -28,6 +29,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         ThemeManager themeManager,
         IDialogService dialogs,
         ILibraryService library,
+        DetectionFlow detectionFlow,
         OrbitPaths paths,
         ILogger log)
     {
@@ -35,6 +37,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         _themeManager = themeManager;
         _dialogs = dialogs;
         _library = library;
+        _detectionFlow = detectionFlow;
         _paths = paths;
         _log = log.ForContext<SettingsViewModel>();
 
@@ -88,6 +91,20 @@ public sealed partial class SettingsViewModel : ObservableObject
         {
             _log.Warning(ex, "Could not read entry count for settings page");
         }
+    }
+
+    [RelayCommand]
+    private async Task ScanForAppsAsync()
+    {
+        var imported = _detectionFlow.Run();
+        if (imported <= 0)
+            return;
+
+        await RefreshAsync().ConfigureAwait(true);
+        if (Host is not null)
+            await Host.RefreshAllAsync().ConfigureAwait(true);
+        Host?.SetStatus($"{imported} application(s) importée(s) depuis la détection automatique.",
+            StatusSeverity.Success);
     }
 
     [RelayCommand]
