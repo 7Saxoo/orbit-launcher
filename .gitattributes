@@ -1,7 +1,7 @@
-* text=auto eol=lf
-*.sln text eol=crlf
-*.csproj text eol=crlf
-*.xaml text eol=crlf
-*.cs text eol=crlf
+# Let Git normalise line endings; contributors keep their platform-native EOL
+# in the working tree and the repo stays consistent.
+* text=auto
+
 *.png binary
 *.ico binary
+*.db binary
