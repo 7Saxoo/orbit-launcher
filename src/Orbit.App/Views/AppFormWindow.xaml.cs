@@ -1,4 +1,5 @@
 using System.Windows;
+using Orbit.App.Infrastructure;
 using Orbit.App.ViewModels;
 
 namespace Orbit.App.Views;
@@ -10,6 +11,7 @@ public partial class AppFormWindow : Window
     public AppFormWindow()
     {
         InitializeComponent();
+        WindowThemeHelper.Attach(this);
     }
 
     private void OnSave(object sender, RoutedEventArgs e)

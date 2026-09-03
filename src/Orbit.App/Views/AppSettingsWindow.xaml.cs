@@ -1,4 +1,5 @@
 using System.Windows;
+using Orbit.App.Infrastructure;
 using Orbit.App.ViewModels;
 
 namespace Orbit.App.Views;
@@ -8,6 +9,7 @@ public partial class AppSettingsWindow : Window
     public AppSettingsWindow()
     {
         InitializeComponent();
+        WindowThemeHelper.Attach(this);
         DataContextChanged += (_, e) =>
         {
             if (e.OldValue is AppSettingsViewModel oldVm)

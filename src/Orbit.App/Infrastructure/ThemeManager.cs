@@ -41,6 +41,8 @@ public sealed class ThemeManager
             merged.Add(dict);
         else
             merged[0] = dict;
+
+        WindowThemeHelper.RaisePaletteChanged();
     }
 
     private static bool IsSystemUsingDarkMode()

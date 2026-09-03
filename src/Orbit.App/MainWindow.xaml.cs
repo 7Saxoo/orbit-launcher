@@ -1,4 +1,5 @@
 using System.Windows;
+using Orbit.App.Infrastructure;
 using Orbit.App.Services;
 using Orbit.Core.Services;
 
@@ -15,6 +16,7 @@ public partial class MainWindow : Window, IWindowService
     {
         _settings = settings;
         InitializeComponent();
+        WindowThemeHelper.Attach(this);
 
         var s = settings.Current;
         Width = Math.Max(MinWidth, s.WindowWidth);
