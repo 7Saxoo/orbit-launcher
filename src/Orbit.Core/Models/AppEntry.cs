@@ -24,6 +24,15 @@ public sealed class AppEntry
     /// </summary>
     public string? WorkingDirectory { get; set; }
 
+    /// <summary>Launch the executable elevated (ShellExecute "runas" verb).</summary>
+    public bool RunAsAdmin { get; set; }
+
+    /// <summary>
+    /// Optional max heap for Java-based games/apps. When set, Orbit prepends
+    /// <c>-Xmx&lt;n&gt;M -Xms&lt;n&gt;M</c> to the arguments.
+    /// </summary>
+    public int? JavaMaxMemoryMb { get; set; }
+
     public AppKind Kind { get; set; } = AppKind.Application;
 
     /// <summary>Free-text category ("Bureautique", "RPG", ...). May be empty.</summary>

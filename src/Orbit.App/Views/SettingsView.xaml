@@ -7,31 +7,72 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance vm:SettingsViewModel}"
              d:DesignWidth="900" d:DesignHeight="620">
+    <UserControl.Resources>
+        <DataTemplate x:Key="LabelOnly">
+            <TextBlock Text="{Binding Label}" />
+        </DataTemplate>
+    </UserControl.Resources>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,6,28,20">
-        <StackPanel MaxWidth="640" HorizontalAlignment="Left">
+        <StackPanel MaxWidth="660" HorizontalAlignment="Left">
             <TextBlock Text="Paramètres" Style="{StaticResource Text.H1}" Margin="0,0,0,18" />
 
             <!-- Apparence -->
             <Border Style="{StaticResource Card}" Margin="0,0,0,14">
                 <StackPanel>
                     <TextBlock Text="Apparence" Style="{StaticResource Text.H2}" />
+
                     <Grid Margin="0,12,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="Thème" Style="{StaticResource Text.Body}" />
+                            <TextBlock Text="Thème" />
                             <TextBlock Text="Clair, sombre ou selon Windows" Style="{StaticResource Text.Caption}" />
                         </StackPanel>
-                        <ComboBox Grid.Column="1" Width="180" Style="{StaticResource ComboBox.Base}"
-                                  ItemsSource="{Binding ThemeOptions}"
-                                  SelectedItem="{Binding SelectedTheme}">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate><TextBlock Text="{Binding Label}" /></DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
+                        <ComboBox Grid.Column="1" Width="190" Style="{StaticResource ComboBox.Base}"
+                                  ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding SelectedTheme}"
+                                  ItemTemplate="{StaticResource LabelOnly}" />
                     </Grid>
+
+                    <Grid Margin="0,14,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Température des couleurs" />
+                            <TextBlock Text="Palette froide (bleu) ou chaude (ambre)" Style="{StaticResource Text.Caption}" />
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" Width="190" Style="{StaticResource ComboBox.Base}"
+                                  ItemsSource="{Binding TemperatureOptions}" SelectedItem="{Binding SelectedTemperature}"
+                                  ItemTemplate="{StaticResource LabelOnly}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Fenêtre -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Fenêtre" Style="{StaticResource Text.H2}" />
+
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Taille de la fenêtre" />
+                            <TextBlock Text="Appliquée immédiatement" Style="{StaticResource Text.Caption}" />
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" Width="190" Style="{StaticResource ComboBox.Base}"
+                                  ItemsSource="{Binding WindowSizeOptions}" SelectedItem="{Binding SelectedWindowSize}"
+                                  ItemTemplate="{StaticResource LabelOnly}" />
+                    </Grid>
+
+                    <CheckBox Margin="0,16,0,0" IsChecked="{Binding MinimizeToTrayOnClose}"
+                              Content="Réduire dans la zone de notification à la fermeture (consommation réduite)" />
                 </StackPanel>
             </Border>
 
@@ -46,27 +87,20 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="Tri par défaut" Style="{StaticResource Text.Body}" />
+                            <TextBlock Text="Tri par défaut" />
                             <TextBlock Text="Ordre appliqué à l'ouverture de la bibliothèque"
                                        Style="{StaticResource Text.Caption}" />
                         </StackPanel>
-                        <ComboBox Grid.Column="1" Width="180" Style="{StaticResource ComboBox.Base}"
-                                  ItemsSource="{Binding SortOptions}"
-                                  SelectedItem="{Binding SelectedSort}">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate><TextBlock Text="{Binding Label}" /></DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
+                        <ComboBox Grid.Column="1" Width="190" Style="{StaticResource ComboBox.Base}"
+                                  ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort}"
+                                  ItemTemplate="{StaticResource LabelOnly}" />
                     </Grid>
 
-                    <CheckBox Margin="0,14,0,0" Foreground="{DynamicResource Brush.Text.Primary}"
-                              IsChecked="{Binding ConfirmBeforeRemove}"
+                    <CheckBox Margin="0,14,0,0" IsChecked="{Binding ConfirmBeforeRemove}"
                               Content="Demander confirmation avant de retirer une application" />
 
-                    <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
-                        <TextBlock Text="{Binding EntryCount, StringFormat='{}{0} application(s) enregistrée(s)'}"
-                                   Style="{StaticResource Text.Caption}" VerticalAlignment="Center" />
-                    </StackPanel>
+                    <TextBlock Margin="0,16,0,0" Style="{StaticResource Text.Caption}"
+                               Text="{Binding EntryCount, StringFormat='{}{0} application(s) enregistrée(s)'}" />
                 </StackPanel>
             </Border>
 
@@ -75,7 +109,7 @@
                 <StackPanel>
                     <TextBlock Text="Détection automatique" Style="{StaticResource Text.H2}" />
                     <TextBlock Style="{StaticResource Text.Caption}" Margin="0,6,0,0" TextWrapping="Wrap"
-                               Text="Recherche les jeux et applications déjà installés (Steam, Epic Games, programmes Windows) et propose de les ajouter à la bibliothèque. Vous choisissez ce qui est importé." />
+                               Text="Recherche les jeux et applications déjà installés (Steam, Epic Games, programmes Windows) et propose de les ajouter. Vous choisissez ce qui est importé." />
                     <Button Content="🔍  Analyser mon ordinateur" Style="{StaticResource Button.Accent}"
                             HorizontalAlignment="Left" Margin="0,12,0,0"
                             Command="{Binding ScanForAppsCommand}" />
@@ -95,8 +129,6 @@
                         <Button Content="Réinitialiser les données…" Style="{StaticResource Button.Danger}"
                                 Command="{Binding ResetDataCommand}" />
                     </StackPanel>
-                    <TextBlock Style="{StaticResource Text.Caption}" Margin="0,8,0,0"
-                               Text="La réinitialisation supprime les entrées et le cache d'icônes. Les fichiers .exe d'origine ne sont jamais supprimés." />
                 </StackPanel>
             </Border>
 
@@ -104,9 +136,8 @@
             <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <TextBlock Text="À propos" Style="{StaticResource Text.H2}" />
-                    <TextBlock Text="{Binding VersionText}" Style="{StaticResource Text.Body}" Margin="0,6,0,0" />
-                    <TextBlock Text="Launcher local pour centraliser applications et jeux Windows."
-                               Style="{StaticResource Text.Caption}" Margin="0,4,0,0" />
+                    <TextBlock Text="{Binding VersionText}" Margin="0,6,0,0" />
+                    <TextBlock Text="{Binding CreditText}" Style="{StaticResource Text.Caption}" Margin="0,2,0,0" />
                 </StackPanel>
             </Border>
         </StackPanel>

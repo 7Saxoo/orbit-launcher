@@ -1,13 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Orbit.Core.Models;
-using Orbit.Core.Services;
 using Serilog;
 
 namespace Orbit.App.ViewModels;
 
-/// <summary>One card in the library / home grids. Owns the per-entry actions
-/// (launch, favourite, edit, remove, fix path, reveal).</summary>
+/// <summary>One card in the library / home grids. Clean surface: a primary
+/// action, a favourite star and a ⋯ button that opens the per-app settings.</summary>
 public sealed partial class AppTileViewModel : ObservableObject
 {
     private readonly AppTileContext _ctx;
@@ -29,30 +28,38 @@ public sealed partial class AppTileViewModel : ObservableObject
     public string? IconPath => Entry.IconCachePath;
     public string KindLabel => Entry.Kind == AppKind.Game ? "Jeu" : "Application";
     public string CategoryLabel => string.IsNullOrWhiteSpace(Entry.Category) ? "Sans catégorie" : Entry.Category;
-    public string LaunchCountLabel =>
-        Entry.LaunchCount == 0 ? "Jamais lancé" : $"{Entry.LaunchCount} lancement{(Entry.LaunchCount > 1 ? "s" : "")}";
-    public DateTimeOffset? LastLaunchedAt => Entry.LastLaunchedAt;
-    public string? Description => Entry.Description;
 
-    [ObservableProperty]
-    private AppAvailability _availability;
+    public string PrimaryActionLabel => Availability == AppAvailability.Missing
+        ? "Fichier introuvable"
+        : Entry.Kind == AppKind.Game ? "▶  Jouer" : "▶  Ouvrir";
 
-    [ObservableProperty]
-    private bool _isFavorite;
+    public string SubtitleLabel
+    {
+        get
+        {
+            var plays = Entry.LaunchCount == 0 ? null : $"{Entry.LaunchCount} lancement{(Entry.LaunchCount > 1 ? "s" : "")}";
+            return plays is null ? KindLabel : $"{KindLabel} · {plays}";
+        }
+    }
 
-    [ObservableProperty]
-    private bool _isBusy;
+    [ObservableProperty] private AppAvailability _availability;
+    [ObservableProperty] private bool _isFavorite;
+    [ObservableProperty] private bool _isBusy;
 
     public bool IsMissing => Availability != AppAvailability.Available;
 
-    partial void OnAvailabilityChanged(AppAvailability value) => OnPropertyChanged(nameof(IsMissing));
+    partial void OnAvailabilityChanged(AppAvailability value)
+    {
+        OnPropertyChanged(nameof(IsMissing));
+        OnPropertyChanged(nameof(PrimaryActionLabel));
+    }
 
     [RelayCommand(CanExecute = nameof(CanInteract))]
     private async Task LaunchAsync()
     {
         if (Availability == AppAvailability.Missing)
         {
-            PromptToFixMissingFile();
+            OpenSettings();
             return;
         }
 
@@ -81,7 +88,7 @@ public sealed partial class AppTileViewModel : ObservableObject
         catch (Exception ex)
         {
             _log.Error(ex, "Unexpected error launching {Id}", Id);
-            _ctx.Dialogs.ShowError("Lancement impossible", $"Une erreur inattendue est survenue :\n{ex.Message}");
+            _ctx.Dialogs.ShowError("Lancement impossible", $"Erreur inattendue :\n{ex.Message}");
         }
         finally
         {
@@ -106,57 +113,16 @@ public sealed partial class AppTileViewModel : ObservableObject
     }
 
     [RelayCommand(CanExecute = nameof(CanInteract))]
-    private async Task EditAsync()
+    private async Task OpenSettingsAsync()
     {
-        var form = new EditAppViewModel(Entry, _ctx.Inspector, _ctx.Dialogs);
-        if (!_ctx.Dialogs.ShowAppForm(form))
-            return;
+        var vm = new AppSettingsViewModel(Entry, _ctx.Library, _ctx.Dialogs, _ctx.Inspector, _ctx.Settings, _ctx.Log);
+        _ctx.Dialogs.ShowAppSettings(vm);
 
-        try
-        {
-            await _ctx.Library.UpdateAsync(form.BuildUpdatedEntry()).ConfigureAwait(true);
-            _ctx.Host.SetStatus($"« {form.Name} » a été mis à jour.", StatusSeverity.Success);
+        if (vm.ChangesMade)
             await _ctx.Host.RefreshAllAsync().ConfigureAwait(true);
-        }
-        catch (Exception ex)
-        {
-            _log.Error(ex, "Could not update {Id}", Id);
-            _ctx.Dialogs.ShowError("Enregistrement impossible", ex.Message);
-        }
     }
 
-    [RelayCommand(CanExecute = nameof(CanInteract))]
-    private async Task RemoveAsync()
-    {
-        if (_ctx.Settings.Current.ConfirmBeforeRemove &&
-            !_ctx.Dialogs.Confirm("Retirer de la bibliothèque",
-                $"Retirer « {Name} » de la bibliothèque ?\n\nLe fichier .exe d'origine ne sera pas supprimé."))
-        {
-            return;
-        }
-
-        try
-        {
-            await _ctx.Library.RemoveAsync(Id).ConfigureAwait(true);
-            _ctx.Host.SetStatus($"« {Name} » a été retiré (le fichier .exe est intact).", StatusSeverity.Info);
-            await _ctx.Host.RefreshAllAsync().ConfigureAwait(true);
-        }
-        catch (Exception ex)
-        {
-            _log.Error(ex, "Could not remove {Id}", Id);
-            _ctx.Dialogs.ShowError("Suppression impossible", ex.Message);
-        }
-    }
-
-    [RelayCommand]
-    private void RevealInExplorer() => _ctx.Dialogs.RevealInExplorer(Entry.ExecutablePath);
-
-    [RelayCommand(CanExecute = nameof(CanInteract))]
-    private Task FixPathAsync()
-    {
-        PromptToFixMissingFile();
-        return Task.CompletedTask;
-    }
+    private void OpenSettings() => OpenSettingsCommand.Execute(null);
 
     private bool CanInteract() => !IsBusy;
 
@@ -164,30 +130,6 @@ public sealed partial class AppTileViewModel : ObservableObject
     {
         LaunchCommand.NotifyCanExecuteChanged();
         ToggleFavoriteCommand.NotifyCanExecuteChanged();
-        EditCommand.NotifyCanExecuteChanged();
-        RemoveCommand.NotifyCanExecuteChanged();
-        FixPathCommand.NotifyCanExecuteChanged();
-    }
-
-    private async void PromptToFixMissingFile()
-    {
-        var picked = _ctx.Dialogs.PickExecutable(
-            Orbit.Core.Infrastructure.PathHelper.GetContainingDirectory(Entry.ExecutablePath));
-        if (picked is null)
-            return;
-
-        try
-        {
-            var updated = Entry.Clone();
-            updated.ExecutablePath = picked;
-            await _ctx.Library.UpdateAsync(updated).ConfigureAwait(true);
-            _ctx.Host.SetStatus($"Chemin de « {Name} » mis à jour.", StatusSeverity.Success);
-            await _ctx.Host.RefreshAllAsync().ConfigureAwait(true);
-        }
-        catch (Exception ex)
-        {
-            _log.Error(ex, "Could not fix path for {Id}", Id);
-            _ctx.Dialogs.ShowError("Mise à jour impossible", ex.Message);
-        }
+        OpenSettingsCommand.NotifyCanExecuteChanged();
     }
 }

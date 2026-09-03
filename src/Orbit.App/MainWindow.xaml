@@ -6,15 +6,24 @@
         xmlns:vm="clr-namespace:Orbit.App.ViewModels"
         mc:Ignorable="d"
         Title="Orbit — Centralisateur d'applications et de jeux"
-        Height="760" Width="1180" MinHeight="560" MinWidth="920"
+        Height="780" Width="1280" MinHeight="560" MinWidth="940"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource Brush.Window.Background}"
         TextOptions.TextFormattingMode="Ideal"
         d:DataContext="{d:DesignInstance vm:MainViewModel}">
 
+    <Window.Resources>
+        <Style x:Key="NavBadge" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource Brush.Surface.Hover}" />
+            <Setter Property="CornerRadius" Value="9" />
+            <Setter Property="Padding" Value="7,1" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="228" />
+            <ColumnDefinition Width="236" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -22,47 +31,80 @@
         <Border Grid.Column="0" Background="{DynamicResource Brush.NavRail.Background}"
                 BorderBrush="{DynamicResource Brush.Surface.Border}" BorderThickness="0,0,1,0">
             <DockPanel LastChildFill="True">
-                <StackPanel DockPanel.Dock="Top" Margin="20,22,20,18">
-                    <TextBlock Text="ORBIT" FontSize="18" FontWeight="Bold"
-                               Foreground="{DynamicResource Brush.Text.Primary}" />
-                    <TextBlock Text="Bibliothèque de jeux &amp; applications"
-                               Style="{StaticResource Text.Caption}" Margin="0,2,0,0" />
+
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="18,20,18,16">
+                    <Image Source="pack://application:,,,/Orbit;component/Assets/orbit-mark.png"
+                           Width="34" Height="34" VerticalAlignment="Center" />
+                    <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="ORBIT" FontSize="18" FontWeight="Bold" />
+                        <TextBlock Text="Jeux &amp; applications" Style="{StaticResource Text.Caption}" />
+                    </StackPanel>
                 </StackPanel>
 
-                <StackPanel DockPanel.Dock="Bottom" Margin="8,8,8,14">
+                <StackPanel DockPanel.Dock="Bottom" Margin="8,8,8,10">
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
-                                 Content="⚙  Paramètres"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Settings}"
-                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Settings}" />
+                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Settings}">
+                        <TextBlock Text="⚙   Paramètres" />
+                    </RadioButton>
                 </StackPanel>
 
                 <StackPanel Margin="8,4,8,8">
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
-                                 Content="🏠  Accueil"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Home}"
-                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Home}" />
+                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Home}">
+                        <TextBlock Text="🏠   Accueil" />
+                    </RadioButton>
+
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
-                                 Content="📚  Bibliothèque"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Library}"
-                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Library}" />
+                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Library}">
+                        <DockPanel>
+                            <Border Style="{StaticResource NavBadge}" DockPanel.Dock="Right">
+                                <TextBlock Text="{Binding Home.TotalCount}" FontSize="11" />
+                            </Border>
+                            <TextBlock Text="📚   Bibliothèque" />
+                        </DockPanel>
+                    </RadioButton>
+
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
-                                 Content="🎮  Jeux"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Games}"
-                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Games}" />
+                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Games}">
+                        <DockPanel>
+                            <Border Style="{StaticResource NavBadge}" DockPanel.Dock="Right">
+                                <TextBlock Text="{Binding Home.GamesCount}" FontSize="11" />
+                            </Border>
+                            <TextBlock Text="🎮   Jeux" />
+                        </DockPanel>
+                    </RadioButton>
+
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
-                                 Content="🧩  Applications"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Applications}"
-                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Applications}" />
+                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Applications}">
+                        <DockPanel>
+                            <Border Style="{StaticResource NavBadge}" DockPanel.Dock="Right">
+                                <TextBlock Text="{Binding Home.ApplicationsCount}" FontSize="11" />
+                            </Border>
+                            <TextBlock Text="🧩   Applications" />
+                        </DockPanel>
+                    </RadioButton>
+
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
-                                 Content="⭐  Favoris"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Favorites}"
-                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Favorites}" />
+                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Favorites}">
+                        <DockPanel>
+                            <Border Style="{StaticResource NavBadge}" DockPanel.Dock="Right">
+                                <TextBlock Text="{Binding Home.FavoritesCount}" FontSize="11" />
+                            </Border>
+                            <TextBlock Text="⭐   Favoris" />
+                        </DockPanel>
+                    </RadioButton>
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -70,7 +112,6 @@
         <!-- ==================== Content ==================== -->
         <DockPanel Grid.Column="1" LastChildFill="True">
 
-            <!-- Header -->
             <Border DockPanel.Dock="Top" Padding="28,20,28,14">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -78,19 +119,18 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0" MaxWidth="420" HorizontalAlignment="Left"
+                    <Grid Grid.Column="0" MaxWidth="440" HorizontalAlignment="Left"
                           Visibility="{Binding IsSearchVisible, Converter={StaticResource BoolToVisibility}}">
                         <TextBox x:Name="SearchBox" Style="{StaticResource TextBox.Base}"
                                  Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, Delay=150}" />
-                        <TextBlock Text="Rechercher une application…" IsHitTestVisible="False"
+                        <TextBlock Text="🔍  Rechercher…" IsHitTestVisible="False"
                                    Margin="12,0,0,0" VerticalAlignment="Center"
                                    Foreground="{DynamicResource Brush.Text.Secondary}"
                                    Visibility="{Binding Text, ElementName=SearchBox, Converter={StaticResource StringToVisibility}, ConverterParameter=invert}" />
                     </Grid>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Button Content="⟳  Actualiser" Style="{StaticResource Button.Base}"
-                                Margin="0,0,10,0"
+                        <Button Content="⟳  Actualiser" Style="{StaticResource Button.Base}" Margin="0,0,10,0"
                                 Command="{Binding Library.ReloadCommand}" />
                         <Button Content="＋  Ajouter" Style="{StaticResource Button.Accent}"
                                 Command="{Binding Library.AddCommand}" />
@@ -98,15 +138,27 @@
                 </Grid>
             </Border>
 
-            <!-- Status bar -->
-            <Border DockPanel.Dock="Bottom" Padding="28,10"
+            <!-- Bottom bar -->
+            <Border DockPanel.Dock="Bottom" Padding="28,9"
                     Background="{DynamicResource Brush.NavRail.Background}"
                     BorderBrush="{DynamicResource Brush.Surface.Border}" BorderThickness="0,1,0,0">
-                <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource Text.Caption}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Style="{StaticResource Text.Caption}"
+                               Text="Orbit v1.1.0 · developed by Saxo" />
+                    <TextBlock Grid.Column="1" Style="{StaticResource Text.Caption}" Margin="16,0,0,0"
+                               Text="{Binding StatusMessage}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Column="2" Style="{StaticResource Text.Caption}"
+                               Foreground="{DynamicResource Brush.Success}"
+                               Text="● Détection automatique disponible" />
+                </Grid>
             </Border>
 
-            <!-- Section content -->
-            <ContentControl Content="{Binding CurrentContent}" Margin="0" />
+            <ContentControl Content="{Binding CurrentContent}" />
         </DockPanel>
     </Grid>
 </Window>

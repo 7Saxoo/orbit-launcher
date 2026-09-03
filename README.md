@@ -52,9 +52,18 @@ chemin, quelques métadonnées et une icône mise en cache.
   catégorie.
 - **Tri** par nom, ajout récent, nombre de lancements ou dernier lancement.
 - **Favoris**.
-- **Thème** clair / sombre / système, appliqué à chaud. Palette chaude
-  (terre cuite / ambre) et police **Poppins** embarquée. Le thème clair est
-  celui par défaut.
+- **Paramètres de l'application** (menu ⋯ de chaque carte) : modifier, définir
+  les options de lancement (arguments, dossier de travail, **lancer en
+  administrateur**, **mémoire max Java `-Xmx/-Xms`**), ouvrir l'emplacement,
+  lancer, ou supprimer de la bibliothèque.
+- **Thème** clair / sombre / système + **température des couleurs** au choix :
+  **froide** (bleu) ou **chaude** (ambre), appliqué à chaud. Police **Poppins**
+  embarquée. Interface épurée façon tableau de bord.
+- **Fenêtre** : taille réglable depuis les paramètres (1280×720, 1600×900,
+  **1920×1080**, maximisée) ; la dimension est mémorisée.
+- **Réduction dans la zone de notification** : fermer la fenêtre la garde en
+  arrière-plan avec une **consommation réduite** (priorité processus abaissée,
+  mémoire de travail relâchée). Menu de la zone de notification : Ouvrir / Quitter.
 - **Persistance locale** en SQLite : les données survivent à la fermeture, au
   redémarrage du PC et à une mise à jour de l'application.
 - **Journalisation** dans des fichiers rotatifs quotidiens.
@@ -73,7 +82,8 @@ chemin, quelques métadonnées et une icône mise en cache.
 | Icônes | `SHGetFileInfo` + `Icon.ExtractAssociatedIcon` + `System.Drawing` | Extraction native, conversion PNG, cache disque. |
 | Injection de dépendances | `Microsoft.Extensions.Hosting` / `DependencyInjection` | Composition centralisée. |
 | Journalisation | **Serilog** (`Sinks.File`, `Sinks.Debug`) | Fichiers rotatifs, format lisible. |
-| Tests | **xUnit** | 81 tests unitaires et d'intégration. |
+| Zone de notification | **Hardcodet.NotifyIcon.Wpf** | Icône de tray + menu, sans dépendance WinForms. |
+| Tests | **xUnit** | 87 tests unitaires et d'intégration. |
 
 ---
 
@@ -169,7 +179,8 @@ Orbit.sln
 │   └── Orbit.App/                  # Présentation WPF (net8.0-windows)
 │       ├── App.xaml(.cs)           # Bootstrap : host DI, Serilog, thème, exceptions globales
 │       ├── MainWindow.xaml(.cs)    # Coquille : rail de navigation + contenu + barre d'état
-│       ├── Infrastructure/         # OrbitLogging, ThemeManager
+│       ├── Infrastructure/         # OrbitLogging, ThemeManager (4 palettes),
+│       │                           #   TrayIconService, PowerManager
 │       ├── Converters/             # Convertisseurs de binding
 │       ├── Services/               # DialogService, AddAppFlow, DetectionFlow
 │       ├── ViewModels/             # Main, Home, Library, AppTile, Settings, Add/Edit, Detection
@@ -238,7 +249,7 @@ d'installation, qui peut être en lecture seule) :
 dotnet test
 ```
 
-**81 tests** (xUnit), notamment :
+**87 tests** (xUnit), notamment :
 
 - **`PathHelperTests`** — normalisation (guillemets, espaces, variables
   d'environnement, accents), comparaison de chemins insensible à la casse et au
@@ -265,7 +276,7 @@ dotnet test
   fichier → correction du chemin → lancement ; et réinitialisation qui n'altère
   jamais le `.exe` source.
 
-Résultat de la dernière exécution : **81 réussis, 0 échec**.
+Résultat de la dernière exécution : **87 réussis, 0 échec**.
 
 En complément, l'application a été **réellement démarrée** (build Release) :
 création de `orbit.db` + migration, écriture de `settings.json`, initialisation de

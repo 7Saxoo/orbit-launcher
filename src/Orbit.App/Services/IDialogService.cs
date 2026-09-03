@@ -26,6 +26,9 @@ public interface IDialogService
     /// <summary>Shows the auto-detection dialog modally.</summary>
     void ShowDetection(DetectionViewModel viewModel);
 
+    /// <summary>Shows the per-app "Paramètres de l'application" dialog modally.</summary>
+    void ShowAppSettings(AppSettingsViewModel viewModel);
+
     /// <summary>Opens Explorer with the given file selected (or the folder).</summary>
     void RevealInExplorer(string path);
 }

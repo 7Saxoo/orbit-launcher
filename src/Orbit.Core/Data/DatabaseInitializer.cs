@@ -10,7 +10,7 @@ namespace Orbit.Core.Data;
 /// </summary>
 public sealed class DatabaseInitializer
 {
-    private const int TargetVersion = 1;
+    private const int TargetVersion = 2;
 
     private readonly SqliteConnectionFactory _factory;
     private readonly ILogger _log;
@@ -70,6 +70,13 @@ public sealed class DatabaseInitializer
                     """);
                 Execute(connection, tx,
                     "CREATE INDEX ix_app_entries_executable_path ON app_entries (executable_path COLLATE NOCASE);");
+                break;
+
+            case 2:
+                Execute(connection, tx,
+                    "ALTER TABLE app_entries ADD COLUMN run_as_admin INTEGER NOT NULL DEFAULT 0;");
+                Execute(connection, tx,
+                    "ALTER TABLE app_entries ADD COLUMN java_max_memory_mb INTEGER NULL;");
                 break;
 
             default:

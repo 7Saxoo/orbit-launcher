@@ -59,10 +59,13 @@ public sealed class ProcessLauncher : IProcessLauncher
         var psi = new ProcessStartInfo
         {
             FileName = path,
-            Arguments = entry.Arguments?.Trim() ?? string.Empty,
+            Arguments = ComposeArguments(entry),
             WorkingDirectory = workingDirectory ?? string.Empty,
             UseShellExecute = true
         };
+
+        if (entry.RunAsAdmin)
+            psi.Verb = "runas"; // ShellExecute elevation prompt
 
         try
         {
@@ -113,6 +116,19 @@ public sealed class ProcessLauncher : IProcessLauncher
         }
 
         return false;
+    }
+
+    internal static string ComposeArguments(AppEntry entry)
+    {
+        var userArgs = entry.Arguments?.Trim() ?? string.Empty;
+
+        if (entry.JavaMaxMemoryMb is > 0 and var mb)
+        {
+            var heap = $"-Xmx{mb}M -Xms{mb}M";
+            return userArgs.Length > 0 ? $"{heap} {userArgs}" : heap;
+        }
+
+        return userArgs;
     }
 
     private static string? FirstUsableDirectory(string? preferred, string executablePath)

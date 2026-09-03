@@ -41,14 +41,17 @@ public partial class App : Application
         {
             _host = BuildHost(paths);
             _host.Services.GetRequiredService<DatabaseInitializer>().Initialize();
-            _host.Services.GetRequiredService<ISettingsService>().Load();
+
+            var settings = _host.Services.GetRequiredService<ISettingsService>();
+            settings.Load();
             _host.Services.GetRequiredService<ThemeManager>()
-                .Apply(_host.Services.GetRequiredService<ISettingsService>().Current.Theme);
+                .Apply(settings.Current.Theme, settings.Current.Temperature);
 
             var main = _host.Services.GetRequiredService<MainViewModel>();
             var window = _host.Services.GetRequiredService<MainWindow>();
             window.DataContext = main;
             MainWindow = window;
+            _host.Services.GetRequiredService<TrayIconService>().Attach(window);
             window.Show();
 
             await main.InitializeAsync().ConfigureAwait(true);
@@ -80,6 +83,7 @@ public partial class App : Application
                 services.AddOrbitCore(paths);
 
                 services.AddSingleton<ThemeManager>();
+                services.AddSingleton<TrayIconService>();
                 services.AddSingleton<IDialogService, DialogService>();
                 services.AddSingleton<AppTileContext>();
                 services.AddSingleton<AddAppFlow>();
@@ -94,6 +98,7 @@ public partial class App : Application
                 services.AddSingleton<MainViewModel>();
 
                 services.AddSingleton<MainWindow>();
+                services.AddSingleton<IWindowService>(sp => sp.GetRequiredService<MainWindow>());
             })
             .Build();
 

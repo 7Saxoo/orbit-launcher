@@ -15,7 +15,7 @@ public class JsonSettingsServiceTests
         service.Load();
 
         Assert.True(File.Exists(ws.Paths.SettingsFile));
-        Assert.Equal(ThemePreference.Light, service.Current.Theme);
+        Assert.Equal(ThemePreference.Dark, service.Current.Theme);
         Assert.True(service.Current.ConfirmBeforeRemove);
     }
 
@@ -28,19 +28,29 @@ public class JsonSettingsServiceTests
 
         await service.SaveAsync(new AppSettings
         {
-            Theme = ThemePreference.Dark,
+            Theme = ThemePreference.Light,
+            Temperature = AccentTemperature.Warm,
             Sort = LibrarySort.MostLaunched,
             ConfirmBeforeRemove = false,
-            LastSection = "Games"
+            LastSection = "Games",
+            WindowWidth = 1920,
+            WindowHeight = 1080,
+            WindowMaximized = true,
+            MinimizeToTrayOnClose = false
         });
 
         var reloaded = new JsonSettingsService(ws.Paths, Logger.None);
         reloaded.Load();
 
-        Assert.Equal(ThemePreference.Dark, reloaded.Current.Theme);
+        Assert.Equal(ThemePreference.Light, reloaded.Current.Theme);
+        Assert.Equal(AccentTemperature.Warm, reloaded.Current.Temperature);
         Assert.Equal(LibrarySort.MostLaunched, reloaded.Current.Sort);
         Assert.False(reloaded.Current.ConfirmBeforeRemove);
         Assert.Equal("Games", reloaded.Current.LastSection);
+        Assert.Equal(1920, reloaded.Current.WindowWidth);
+        Assert.Equal(1080, reloaded.Current.WindowHeight);
+        Assert.True(reloaded.Current.WindowMaximized);
+        Assert.False(reloaded.Current.MinimizeToTrayOnClose);
     }
 
     [Fact]
@@ -52,7 +62,7 @@ public class JsonSettingsServiceTests
         var service = new JsonSettingsService(ws.Paths, Logger.None);
         service.Load();
 
-        Assert.Equal(ThemePreference.Light, service.Current.Theme);
+        Assert.Equal(ThemePreference.Dark, service.Current.Theme);
         var quarantined = Directory.GetFiles(ws.Paths.BaseDirectory, "settings.json.corrupt-*");
         Assert.NotEmpty(quarantined);
     }

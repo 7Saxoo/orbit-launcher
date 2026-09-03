@@ -1,0 +1,34 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Dark · Cool — deep navy, blue accent (CENTRALIS-style). -->
+
+    <Color x:Key="Color.Accent">#4C7DF0</Color>
+    <Color x:Key="Color.Accent.Hover">#5F8DF5</Color>
+    <Color x:Key="Color.Accent.Pressed">#3B67D9</Color>
+
+    <SolidColorBrush x:Key="Brush.Window.Background" Color="#0F1524" />
+    <SolidColorBrush x:Key="Brush.NavRail.Background" Color="#131A2C" />
+    <SolidColorBrush x:Key="Brush.Surface" Color="#1A2338" />
+    <SolidColorBrush x:Key="Brush.Surface.Hover" Color="#232E47" />
+    <SolidColorBrush x:Key="Brush.Surface.Border" Color="#2E3A54" />
+
+    <SolidColorBrush x:Key="Brush.Control.Background" Color="#161F32" />
+    <SolidColorBrush x:Key="Brush.Control.Border" Color="#35425F" />
+
+    <SolidColorBrush x:Key="Brush.Text.Primary" Color="#E9EFFA" />
+    <SolidColorBrush x:Key="Brush.Text.Secondary" Color="#93A1BD" />
+    <SolidColorBrush x:Key="Brush.Text.OnAccent" Color="#FFFFFF" />
+
+    <SolidColorBrush x:Key="Brush.Accent" Color="{DynamicResource Color.Accent}" />
+    <SolidColorBrush x:Key="Brush.Accent.Hover" Color="{DynamicResource Color.Accent.Hover}" />
+    <SolidColorBrush x:Key="Brush.Accent.Pressed" Color="{DynamicResource Color.Accent.Pressed}" />
+    <SolidColorBrush x:Key="Brush.Accent.Soft" Color="#3D4C7DF0" />
+
+    <SolidColorBrush x:Key="Brush.Danger" Color="#E5675E" />
+    <SolidColorBrush x:Key="Brush.Warning" Color="#E9A23B" />
+    <SolidColorBrush x:Key="Brush.Success" Color="#48B27E" />
+
+    <SolidColorBrush x:Key="Brush.Overlay" Color="#B00A0F1A" />
+
+</ResourceDictionary>

@@ -130,6 +130,29 @@ public class SqliteAppRepositoryTests
     }
 
     [Fact]
+    public async Task Launch_option_columns_round_trip()
+    {
+        using var ws = new TempWorkspace();
+        var (repo, _) = NewRepo(ws);
+        var entry = SampleEntry("Java Game");
+        entry.RunAsAdmin = true;
+        entry.JavaMaxMemoryMb = 4096;
+        await repo.AddAsync(entry);
+
+        var loaded = await repo.GetByIdAsync(entry.Id);
+        Assert.True(loaded!.RunAsAdmin);
+        Assert.Equal(4096, loaded.JavaMaxMemoryMb);
+
+        loaded.RunAsAdmin = false;
+        loaded.JavaMaxMemoryMb = null;
+        await repo.UpdateAsync(loaded);
+
+        var again = await repo.GetByIdAsync(entry.Id);
+        Assert.False(again!.RunAsAdmin);
+        Assert.Null(again.JavaMaxMemoryMb);
+    }
+
+    [Fact]
     public async Task Accented_and_spaced_paths_round_trip_unchanged()
     {
         using var ws = new TempWorkspace();

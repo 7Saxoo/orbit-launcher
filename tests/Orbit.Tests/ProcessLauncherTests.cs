@@ -84,4 +84,28 @@ public class ProcessLauncherTests
         var outcome = launcher.Launch(Entry());
         Assert.Equal(LaunchStatus.Failed, outcome.Status);
     }
+
+    [Fact]
+    public void Launch_sets_runas_verb_when_RunAsAdmin()
+    {
+        var launcher = Build(_ => null);
+        var entry = Entry();
+        entry.RunAsAdmin = true;
+
+        launcher.Launch(entry);
+
+        Assert.Equal("runas", _captured!.Verb);
+    }
+
+    [Theory]
+    [InlineData(2048, null, "-Xmx2048M -Xms2048M")]
+    [InlineData(1024, "--fullscreen", "-Xmx1024M -Xms1024M --fullscreen")]
+    [InlineData(null, "--fullscreen", "--fullscreen")]
+    [InlineData(0, "--x", "--x")]
+    public void ComposeArguments_prepends_java_heap_when_requested(int? mb, string? userArgs, string expected)
+    {
+        var entry = Entry(args: userArgs);
+        entry.JavaMaxMemoryMb = mb;
+        Assert.Equal(expected, ProcessLauncher.ComposeArguments(entry));
+    }
 }

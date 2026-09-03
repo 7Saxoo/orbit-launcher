@@ -6,47 +6,31 @@
              xmlns:vm="clr-namespace:Orbit.App.ViewModels"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance vm:AppTileViewModel}"
-             d:DesignWidth="260">
-    <Border Style="{StaticResource Card}" Width="260" Margin="0,0,16,16">
+             d:DesignWidth="264">
+    <Border Style="{StaticResource Card}" Width="264" Margin="0,0,16,16" Padding="0"
+            ClipToBounds="True">
         <StackPanel>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Width="48" Height="48" CornerRadius="10"
-                        Background="{DynamicResource Brush.Surface.Hover}">
-                    <Image Width="36" Height="36"
-                           Source="{Binding IconPath, Converter={StaticResource IconToImage}}"
-                           RenderOptions.BitmapScalingMode="HighQuality" />
-                </Border>
+            <!-- Banner -->
+            <Grid Height="112">
+                <Border Background="{DynamicResource Brush.Accent.Soft}" />
+                <Image Width="56" Height="56" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Source="{Binding IconPath, Converter={StaticResource IconToImage}}"
+                       RenderOptions.BitmapScalingMode="HighQuality" />
 
-                <StackPanel Grid.Column="1" Margin="12,0,8,0" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding Name}" Style="{StaticResource Text.H2}"
-                               TextTrimming="CharacterEllipsis" MaxHeight="42" />
-                    <TextBlock Style="{StaticResource Text.Caption}" Margin="0,2,0,0">
-                        <Run Text="{Binding KindLabel, Mode=OneWay}" />
-                        <Run Text=" · " />
-                        <Run Text="{Binding CategoryLabel, Mode=OneWay}" />
-                    </TextBlock>
-                </StackPanel>
-
-                <ToggleButton Grid.Column="2" VerticalAlignment="Top"
-                              Cursor="Hand" BorderThickness="0" Background="Transparent"
+                <ToggleButton VerticalAlignment="Top" HorizontalAlignment="Left" Margin="8"
+                              Cursor="Hand" Background="Transparent" BorderThickness="0"
                               IsChecked="{Binding IsFavorite, Mode=OneWay}"
-                              Command="{Binding ToggleFavoriteCommand}"
-                              ToolTip="Ajouter/retirer des favoris">
+                              Command="{Binding ToggleFavoriteCommand}" ToolTip="Favori">
                     <ToggleButton.Style>
                         <Style TargetType="ToggleButton">
                             <Setter Property="Content" Value="☆" />
-                            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Secondary}" />
-                            <Setter Property="FontSize" Value="18" />
+                            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.OnAccent}" />
+                            <Setter Property="FontSize" Value="17" />
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="ToggleButton">
-                                        <Border Background="Transparent" Padding="4">
+                                        <Border Background="#33000000" CornerRadius="7" Padding="5,2">
                                             <ContentPresenter />
                                         </Border>
                                     </ControlTemplate>
@@ -61,31 +45,45 @@
                         </Style>
                     </ToggleButton.Style>
                 </ToggleButton>
+
+                <Button VerticalAlignment="Top" HorizontalAlignment="Right" Margin="8"
+                        Content="⋯" FontSize="17" Cursor="Hand"
+                        Foreground="{DynamicResource Brush.Text.OnAccent}"
+                        Command="{Binding OpenSettingsCommand}"
+                        ToolTip="Paramètres de l'application">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="b" Background="#33000000" CornerRadius="7" Padding="7,0,7,4">
+                                <ContentPresenter VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="b" Property="Background" Value="#55000000" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <Border VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="8"
+                        Background="{DynamicResource Brush.Danger}" CornerRadius="5" Padding="6,2"
+                        Visibility="{Binding IsMissing, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="Introuvable" FontSize="11"
+                               Foreground="{DynamicResource Brush.Text.OnAccent}" />
+                </Border>
             </Grid>
 
-            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                <Ellipse Width="8" Height="8" VerticalAlignment="Center"
-                         Fill="{Binding Availability, Converter={StaticResource AvailabilityToBrush}}" />
-                <TextBlock Margin="6,0,0,0" Style="{StaticResource Text.Caption}"
-                           Text="{Binding Availability, Converter={StaticResource AvailabilityToText}}" />
-            </StackPanel>
+            <!-- Body -->
+            <StackPanel Margin="14,12,14,14">
+                <TextBlock Text="{Binding Name}" Style="{StaticResource Text.H2}"
+                           TextTrimming="CharacterEllipsis" />
+                <TextBlock Text="{Binding SubtitleLabel}" Style="{StaticResource Text.Caption}"
+                           Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
 
-            <Button Margin="0,12,0,0" Style="{StaticResource Button.Accent}"
-                    Content="▶  Lancer" HorizontalAlignment="Stretch"
-                    Command="{Binding LaunchCommand}" />
-
-            <Button Margin="0,8,0,0" Style="{StaticResource Button.Base}"
-                    Content="Localiser le fichier…" HorizontalAlignment="Stretch"
-                    Visibility="{Binding IsMissing, Converter={StaticResource BoolToVisibility}}"
-                    Command="{Binding FixPathCommand}" />
-
-            <StackPanel Orientation="Horizontal" Margin="0,8,0,0" HorizontalAlignment="Center">
-                <Button Content="Modifier" Style="{StaticResource Button.Ghost}"
-                        Command="{Binding EditCommand}" />
-                <Button Content="Emplacement" Style="{StaticResource Button.Ghost}"
-                        Command="{Binding RevealInExplorerCommand}" />
-                <Button Content="Retirer" Style="{StaticResource Button.Danger}"
-                        Command="{Binding RemoveCommand}" />
+                <Button Margin="0,12,0,0" Style="{StaticResource Button.Accent}"
+                        HorizontalAlignment="Stretch"
+                        Content="{Binding PrimaryActionLabel}"
+                        Command="{Binding LaunchCommand}" />
             </StackPanel>
         </StackPanel>
     </Border>

@@ -10,6 +10,8 @@ using Serilog;
 namespace Orbit.App.ViewModels;
 
 public sealed record ThemeOption(ThemePreference Value, string Label);
+public sealed record TemperatureOption(AccentTemperature Value, string Label);
+public sealed record WindowSizeOption(int Width, int Height, bool Maximized, string Label);
 
 /// <summary>Backs the "Paramètres" page.</summary>
 public sealed partial class SettingsViewModel : ObservableObject
@@ -19,6 +21,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly IDialogService _dialogs;
     private readonly ILibraryService _library;
     private readonly DetectionFlow _detectionFlow;
+    private readonly IWindowService _windowService;
     private readonly OrbitPaths _paths;
     private readonly ILogger _log;
 
@@ -30,6 +33,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         IDialogService dialogs,
         ILibraryService library,
         DetectionFlow detectionFlow,
+        IWindowService windowService,
         OrbitPaths paths,
         ILogger log)
     {
@@ -38,11 +42,14 @@ public sealed partial class SettingsViewModel : ObservableObject
         _dialogs = dialogs;
         _library = library;
         _detectionFlow = detectionFlow;
+        _windowService = windowService;
         _paths = paths;
         _log = log.ForContext<SettingsViewModel>();
 
         _selectedTheme = ThemeOptions[0];
+        _selectedTemperature = TemperatureOptions[0];
         _selectedSort = SortOptions[0];
+        _selectedWindowSize = WindowSizeOptions[0];
         LoadFromSettings();
     }
 
@@ -56,6 +63,12 @@ public sealed partial class SettingsViewModel : ObservableObject
         new ThemeOption(ThemePreference.Dark, "Sombre"),
     };
 
+    public IReadOnlyList<TemperatureOption> TemperatureOptions { get; } = new[]
+    {
+        new TemperatureOption(AccentTemperature.Cool, "Froide (bleu)"),
+        new TemperatureOption(AccentTemperature.Warm, "Chaude (ambre)"),
+    };
+
     public IReadOnlyList<SortOption> SortOptions { get; } = new[]
     {
         new SortOption(LibrarySort.Name, "Nom (A → Z)"),
@@ -64,19 +77,32 @@ public sealed partial class SettingsViewModel : ObservableObject
         new SortOption(LibrarySort.LastLaunched, "Dernier lancement"),
     };
 
+    public IReadOnlyList<WindowSizeOption> WindowSizeOptions { get; } = new[]
+    {
+        new WindowSizeOption(1280, 720, false, "1280 × 720"),
+        new WindowSizeOption(1600, 900, false, "1600 × 900"),
+        new WindowSizeOption(1920, 1080, false, "1920 × 1080"),
+        new WindowSizeOption(0, 0, true, "Maximisée"),
+    };
+
     [ObservableProperty] private ThemeOption _selectedTheme;
+    [ObservableProperty] private TemperatureOption _selectedTemperature;
     [ObservableProperty] private SortOption _selectedSort;
+    [ObservableProperty] private WindowSizeOption _selectedWindowSize;
     [ObservableProperty] private bool _confirmBeforeRemove = true;
+    [ObservableProperty] private bool _minimizeToTrayOnClose = true;
     [ObservableProperty] private int _entryCount;
 
     public string VersionText
     {
         get
         {
-            var version = Assembly.GetExecutingAssembly().GetName().Version;
-            return version is null ? "Orbit" : $"Orbit v{version.Major}.{version.Minor}.{version.Build}";
+            var v = Assembly.GetExecutingAssembly().GetName().Version;
+            return v is null ? "Orbit" : $"Orbit v{v.Major}.{v.Minor}.{v.Build}";
         }
     }
+
+    public string CreditText => "developed by Saxo";
 
     public string DataFolderPath => _paths.BaseDirectory;
 
@@ -148,7 +174,13 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     partial void OnSelectedThemeChanged(ThemeOption value)
     {
-        _themeManager.Apply(value.Value);
+        _themeManager.Apply(value.Value, SelectedTemperature.Value);
+        Persist();
+    }
+
+    partial void OnSelectedTemperatureChanged(TemperatureOption value)
+    {
+        _themeManager.Apply(SelectedTheme.Value, value.Value);
         Persist();
     }
 
@@ -156,15 +188,33 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     partial void OnConfirmBeforeRemoveChanged(bool value) => Persist();
 
+    partial void OnMinimizeToTrayOnCloseChanged(bool value) => Persist();
+
+    partial void OnSelectedWindowSizeChanged(WindowSizeOption value)
+    {
+        if (_suppressPersist)
+            return;
+
+        _windowService.ApplySize(value.Width, value.Height, value.Maximized);
+        Persist();
+    }
+
     private void LoadFromSettings()
     {
         _suppressPersist = true;
         try
         {
-            var current = _settings.Current;
-            SelectedTheme = ThemeOptions.FirstOrDefault(o => o.Value == current.Theme) ?? ThemeOptions[0];
-            SelectedSort = SortOptions.FirstOrDefault(o => o.Value == current.Sort) ?? SortOptions[0];
-            ConfirmBeforeRemove = current.ConfirmBeforeRemove;
+            var c = _settings.Current;
+            SelectedTheme = ThemeOptions.FirstOrDefault(o => o.Value == c.Theme) ?? ThemeOptions[0];
+            SelectedTemperature = TemperatureOptions.FirstOrDefault(o => o.Value == c.Temperature) ?? TemperatureOptions[0];
+            SelectedSort = SortOptions.FirstOrDefault(o => o.Value == c.Sort) ?? SortOptions[0];
+            ConfirmBeforeRemove = c.ConfirmBeforeRemove;
+            MinimizeToTrayOnClose = c.MinimizeToTrayOnClose;
+            SelectedWindowSize =
+                WindowSizeOptions.FirstOrDefault(o =>
+                    o.Maximized == c.WindowMaximized &&
+                    (c.WindowMaximized || (o.Width == c.WindowWidth && o.Height == c.WindowHeight)))
+                ?? WindowSizeOptions[0];
         }
         finally
         {
@@ -179,8 +229,20 @@ public sealed partial class SettingsViewModel : ObservableObject
 
         var updated = _settings.Current.Clone();
         updated.Theme = SelectedTheme.Value;
+        updated.Temperature = SelectedTemperature.Value;
         updated.Sort = SelectedSort.Value;
         updated.ConfirmBeforeRemove = ConfirmBeforeRemove;
+        updated.MinimizeToTrayOnClose = MinimizeToTrayOnClose;
+        if (SelectedWindowSize.Maximized)
+        {
+            updated.WindowMaximized = true;
+        }
+        else
+        {
+            updated.WindowMaximized = false;
+            updated.WindowWidth = SelectedWindowSize.Width;
+            updated.WindowHeight = SelectedWindowSize.Height;
+        }
 
         _ = PersistAsync(updated);
     }

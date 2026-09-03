@@ -13,7 +13,8 @@ public sealed class SqliteAppRepository : IAppRepository
     private const string Columns =
         "id, name, executable_path, arguments, working_directory, kind, category, description, " +
         "icon_cache_path, date_added, launch_count, last_launched_at, is_favorite, " +
-        "genre, platform, publisher, cover_image_path, play_time_seconds";
+        "genre, platform, publisher, cover_image_path, play_time_seconds, " +
+        "run_as_admin, java_max_memory_mb";
 
     private readonly SqliteConnectionFactory _factory;
     private readonly ILogger _log;
@@ -70,7 +71,8 @@ public sealed class SqliteAppRepository : IAppRepository
             INSERT INTO app_entries ({Columns})
             VALUES ($id, $name, $path, $args, $wd, $kind, $category, $description,
                     $icon, $added, $count, $last, $fav,
-                    $genre, $platform, $publisher, $cover, $playtime);
+                    $genre, $platform, $publisher, $cover, $playtime,
+                    $admin, $javamem);
             """;
         Bind(cmd, entry);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
@@ -89,7 +91,8 @@ public sealed class SqliteAppRepository : IAppRepository
                 date_added = $added, launch_count = $count, last_launched_at = $last,
                 is_favorite = $fav, genre = $genre, platform = $platform,
                 publisher = $publisher, cover_image_path = $cover,
-                play_time_seconds = $playtime
+                play_time_seconds = $playtime, run_as_admin = $admin,
+                java_max_memory_mb = $javamem
             WHERE id = $id;
             """;
         Bind(cmd, entry);
@@ -155,6 +158,8 @@ public sealed class SqliteAppRepository : IAppRepository
         cmd.Parameters.AddWithValue("$publisher", (object?)e.Publisher ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$cover", (object?)e.CoverImagePath ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$playtime", (object?)e.PlayTimeSeconds ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$admin", e.RunAsAdmin ? 1 : 0);
+        cmd.Parameters.AddWithValue("$javamem", (object?)e.JavaMaxMemoryMb ?? DBNull.Value);
     }
 
     private static AppEntry Map(SqliteDataReader r) => new()
@@ -176,7 +181,9 @@ public sealed class SqliteAppRepository : IAppRepository
         Platform = r.IsDBNull(14) ? null : r.GetString(14),
         Publisher = r.IsDBNull(15) ? null : r.GetString(15),
         CoverImagePath = r.IsDBNull(16) ? null : r.GetString(16),
-        PlayTimeSeconds = r.IsDBNull(17) ? null : r.GetInt64(17)
+        PlayTimeSeconds = r.IsDBNull(17) ? null : r.GetInt64(17),
+        RunAsAdmin = !r.IsDBNull(18) && r.GetInt32(18) != 0,
+        JavaMaxMemoryMb = r.IsDBNull(19) ? null : r.GetInt32(19)
     };
 
     private static DateTimeOffset? ParseDate(string value) =>

@@ -7,6 +7,13 @@ public enum ThemePreference
     Dark = 2
 }
 
+/// <summary>Accent colour family: cool blues/violets or warm ambers/terracotta.</summary>
+public enum AccentTemperature
+{
+    Cool = 0,
+    Warm = 1
+}
+
 public enum LibrarySort
 {
     Name = 0,
@@ -18,8 +25,9 @@ public enum LibrarySort
 /// <summary>User-facing settings, serialised to <c>settings.json</c>.</summary>
 public sealed class AppSettings
 {
-    // Default to the light, warm look; users can switch to Dark or System.
-    public ThemePreference Theme { get; set; } = ThemePreference.Light;
+    public ThemePreference Theme { get; set; } = ThemePreference.Dark;
+
+    public AccentTemperature Temperature { get; set; } = AccentTemperature.Cool;
 
     public LibrarySort Sort { get; set; } = LibrarySort.Name;
 
@@ -28,6 +36,14 @@ public sealed class AppSettings
 
     /// <summary>Remembers the last navigation section so the app reopens where it was.</summary>
     public string LastSection { get; set; } = "Home";
+
+    // ---- Window ----
+    public int WindowWidth { get; set; } = 1280;
+    public int WindowHeight { get; set; } = 780;
+    public bool WindowMaximized { get; set; }
+
+    /// <summary>Closing the window hides it to the notification area instead of quitting.</summary>
+    public bool MinimizeToTrayOnClose { get; set; } = true;
 
     public AppSettings Clone() => (AppSettings)MemberwiseClone();
 }
