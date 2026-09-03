@@ -130,6 +130,18 @@ public sealed class LibraryService : ILibraryService
         var entry = await _repository.GetByIdAsync(id, ct).ConfigureAwait(false)
             ?? throw new InvalidOperationException($"Entry {id:D} no longer exists.");
 
+        // Guard here as well as in the launcher: the service contract is "a
+        // missing file never counts as a launch", independent of the launcher.
+        switch (_inspector.Evaluate(entry.ExecutablePath))
+        {
+            case AppAvailability.Missing:
+                return new LaunchOutcome(LaunchStatus.FileNotFound,
+                    $"Le fichier est introuvable :\n{entry.ExecutablePath}");
+            case AppAvailability.Invalid:
+                return new LaunchOutcome(LaunchStatus.NotAnExecutable,
+                    $"Ce fichier n'est pas un exécutable (.exe) :\n{entry.ExecutablePath}");
+        }
+
         var outcome = _launcher.Launch(entry);
         if (outcome.Succeeded)
             await _repository.RecordLaunchAsync(id, DateTimeOffset.Now, ct).ConfigureAwait(false);
