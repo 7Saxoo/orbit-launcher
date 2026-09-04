@@ -12,6 +12,20 @@ public partial class AppFormWindow : Window
     {
         InitializeComponent();
         WindowThemeHelper.Attach(this);
+
+        DataContextChanged += (_, e) =>
+        {
+            if (e.OldValue is AppFormViewModel oldVm)
+                oldVm.CloseRequested -= OnCloseRequested;
+            if (e.NewValue is AppFormViewModel newVm)
+                newVm.CloseRequested += OnCloseRequested;
+        };
+    }
+
+    private void OnCloseRequested(object? sender, EventArgs e)
+    {
+        DialogResult = false;
+        Close();
     }
 
     private void OnSave(object sender, RoutedEventArgs e)

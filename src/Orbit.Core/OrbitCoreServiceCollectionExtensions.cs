@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Orbit.Core.Data;
 using Orbit.Core.Detection;
+using Orbit.Core.Identification;
 using Orbit.Core.Infrastructure;
 using Orbit.Core.Services;
 
@@ -31,6 +32,14 @@ public static class OrbitCoreServiceCollectionExtensions
         services.AddSingleton<IInstalledAppSource, SteamSource>();
         services.AddSingleton<IInstalledAppSource, EpicGamesSource>();
         services.AddSingleton<IAppDetectionService, AppDetectionService>();
+
+        // Automatic identification of a picked .exe. The IGDB provider (online,
+        // key-gated) is added by the app layer alongside an HttpClient.
+        services.AddSingleton<IProcessRunner, ProcessRunner>();
+        services.AddSingleton<IIdentificationSettings, SettingsIdentificationAdapter>();
+        services.AddSingleton<IIdentificationProvider, PathHeuristicsProvider>();
+        services.AddSingleton<IIdentificationProvider, WinGetProvider>();
+        services.AddSingleton<IAppIdentificationService, AppIdentificationService>();
 
         return services;
     }

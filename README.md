@@ -30,8 +30,15 @@ chemin, quelques métadonnées et une icône mise en cache.
 ## Fonctionnalités
 
 - **Ajouter** une application ou un jeu à partir d'un fichier `.exe` choisi dans
-  l'explorateur Windows ; le nom, la description et l'éditeur sont pré-remplis
-  automatiquement à partir des métadonnées du fichier.
+  l'explorateur Windows. Le bouton *Ajouter* propose aussi de **lancer l'analyse
+  du PC** directement.
+- **Identification automatique** à l'ajout d'un `.exe` : analyse du nom, du
+  chemin, du dossier parent, de l'éditeur et des **métadonnées Windows**, puis
+  recoupement avec **WinGet** (applications) et **IGDB** (jeux, si des clés sont
+  configurées). Un **score de confiance** évite les mauvaises détections :
+  au-dessus du seuil, l'entrée est classée en *Jeux* ou *Applications* avec
+  nom / éditeur / genre / jaquette ; en dessous, elle est marquée **« Inconnu »**
+  et l'utilisateur choisit. (Architecture à fournisseurs : `Identification/`.)
 - **Détection automatique** des jeux et applications déjà installés : analyse de
   **Steam** (bibliothèques + manifestes), **Epic Games** (manifestes) et de la
   **liste des programmes installés de Windows** (registre). L'utilisateur coche
@@ -60,8 +67,9 @@ chemin, quelques métadonnées et une icône mise en cache.
   lancer, ou supprimer de la bibliothèque.
 - **Thème** clair / sombre / système + **température des couleurs** au choix :
   **froide** (bleu) ou **chaude** (ambre), appliqué à chaud. Police **Poppins**
-  embarquée. Interface épurée façon tableau de bord, **barre de titre et barres
-  de défilement thématisées**, transitions de section animées.
+  embarquée. Interface épurée façon tableau de bord ; **barre de titre, barres
+  de défilement, menus, info-bulles et boîtes de dialogue** suivent la palette
+  (plus de `MessageBox` Windows) ; transitions de section animées.
 - **Fenêtre** : « adaptée à l'écran » au premier lancement, puis taille réglable
   depuis les paramètres (1280×720, 1600×900, **1920×1080**, maximisée) et
   mémorisée.
@@ -90,7 +98,7 @@ chemin, quelques métadonnées et une icône mise en cache.
 | Injection de dépendances | `Microsoft.Extensions.Hosting` / `DependencyInjection` | Composition centralisée. |
 | Journalisation | **Serilog** (`Sinks.File`, `Sinks.Debug`) | Fichiers rotatifs, format lisible. |
 | Zone de notification | **Hardcodet.NotifyIcon.Wpf** | Icône de tray + menu, sans dépendance WinForms. |
-| Tests | **xUnit** | 88 tests unitaires et d'intégration. |
+| Tests | **xUnit** | 107 tests unitaires et d'intégration. |
 
 ---
 
@@ -205,6 +213,8 @@ Orbit.sln
 │   │   │                           #   IconService, JsonSettingsService, LibraryService
 │   │   ├── Detection/              # VdfParser, SteamCatalog/Source, EpicManifestReader/Source,
 │   │   │                           #   RegistryUninstallSource, MainExecutableFinder, AppDetectionService
+│   │   ├── Identification/         # ExeSignals, TextSimilarity, PathHeuristicsProvider,
+│   │   │                           #   WinGetProvider, IgdbGameProvider, AppIdentificationService
 │   │   └── OrbitCoreServiceCollectionExtensions.cs
 │   │
 │   └── Orbit.App/                  # Présentation WPF (net8.0-windows)
@@ -284,7 +294,7 @@ d'installation, qui peut être en lecture seule) :
 dotnet test
 ```
 
-**88 tests** (xUnit), notamment :
+**107 tests** (xUnit), notamment :
 
 - **`PathHelperTests`** — normalisation (guillemets, espaces, variables
   d'environnement, accents), comparaison de chemins insensible à la casse et au
@@ -311,7 +321,7 @@ dotnet test
   fichier → correction du chemin → lancement ; et réinitialisation qui n'altère
   jamais le `.exe` source.
 
-Résultat de la dernière exécution : **88 réussis, 0 échec**.
+Résultat de la dernière exécution : **107 réussis, 0 échec**.
 
 En complément, l'application a été **réellement démarrée** (build Release) :
 création de `orbit.db` + migration, écriture de `settings.json`, initialisation de

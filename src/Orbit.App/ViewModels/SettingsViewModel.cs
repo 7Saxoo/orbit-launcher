@@ -94,6 +94,10 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _minimizeToTrayOnClose = true;
     [ObservableProperty] private int _entryCount;
 
+    [ObservableProperty] private string _igdbClientId = string.Empty;
+    [ObservableProperty] private string _igdbClientSecret = string.Empty;
+    [ObservableProperty] private string _steamGridDbApiKey = string.Empty;
+
     public string VersionText
     {
         get
@@ -191,6 +195,10 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     partial void OnMinimizeToTrayOnCloseChanged(bool value) => Persist();
 
+    partial void OnIgdbClientIdChanged(string value) => Persist();
+    partial void OnIgdbClientSecretChanged(string value) => Persist();
+    partial void OnSteamGridDbApiKeyChanged(string value) => Persist();
+
     partial void OnSelectedWindowSizeChanged(WindowSizeOption value)
     {
         if (_suppressPersist)
@@ -211,6 +219,9 @@ public sealed partial class SettingsViewModel : ObservableObject
             SelectedSort = SortOptions.FirstOrDefault(o => o.Value == c.Sort) ?? SortOptions[0];
             ConfirmBeforeRemove = c.ConfirmBeforeRemove;
             MinimizeToTrayOnClose = c.MinimizeToTrayOnClose;
+            IgdbClientId = c.IgdbClientId ?? string.Empty;
+            IgdbClientSecret = c.IgdbClientSecret ?? string.Empty;
+            SteamGridDbApiKey = c.SteamGridDbApiKey ?? string.Empty;
             SelectedWindowSize =
                 WindowSizeOptions.FirstOrDefault(o =>
                     o.Maximized == c.WindowMaximized &&
@@ -234,6 +245,9 @@ public sealed partial class SettingsViewModel : ObservableObject
         updated.Sort = SelectedSort.Value;
         updated.ConfirmBeforeRemove = ConfirmBeforeRemove;
         updated.MinimizeToTrayOnClose = MinimizeToTrayOnClose;
+        updated.IgdbClientId = Blank(IgdbClientId);
+        updated.IgdbClientSecret = Blank(IgdbClientSecret);
+        updated.SteamGridDbApiKey = Blank(SteamGridDbApiKey);
         if (SelectedWindowSize.Maximized)
         {
             updated.WindowMaximized = true;
@@ -247,6 +261,9 @@ public sealed partial class SettingsViewModel : ObservableObject
 
         _ = PersistAsync(updated);
     }
+
+    private static string? Blank(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private async Task PersistAsync(AppSettings settings)
     {

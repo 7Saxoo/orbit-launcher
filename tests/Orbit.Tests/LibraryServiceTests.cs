@@ -191,6 +191,30 @@ public class LibraryServiceTests
     }
 
     [Fact]
+    public async Task AddAsync_persists_identification_metadata()
+    {
+        var request = new NewAppRequest
+        {
+            ExecutablePath = @"C:\Games\ER\eldenring.exe",
+            Name = "Elden Ring",
+            Kind = AppKind.Game,
+            Category = "Jeux",
+            Publisher = "FromSoftware",
+            Genre = "Action RPG",
+            CoverImagePath = @"C:\cache\covers\er.jpg"
+        };
+
+        var entry = await _service.AddAsync(request);
+
+        Assert.Equal("FromSoftware", entry.Publisher);
+        Assert.Equal("Action RPG", entry.Genre);
+        Assert.Equal(@"C:\cache\covers\er.jpg", entry.CoverImagePath);
+
+        var reloaded = await _repo.GetByIdAsync(entry.Id);
+        Assert.Equal("FromSoftware", reloaded!.Publisher);
+    }
+
+    [Fact]
     public async Task RemoveManyAsync_removes_all_targets_and_reports_count()
     {
         var a = await _service.AddAsync(Request(@"C:\A\a.exe", "A"));

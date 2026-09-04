@@ -124,8 +124,12 @@
                                HorizontalAlignment="Center" />
                     <TextBlock Text="{Binding EmptyStateMessage}" Style="{StaticResource Text.Caption}"
                                TextAlignment="Center" Margin="0,8,0,16" />
-                    <Button Content="＋  Ajouter une application" Style="{StaticResource Button.Accent}"
-                            HorizontalAlignment="Center" Command="{Binding AddCommand}" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="＋  Ajouter une application" Style="{StaticResource Button.Accent}"
+                                Command="{Binding AddCommand}" />
+                        <Button Content="🔍  Analyser mon PC" Style="{StaticResource Button.Base}"
+                                Margin="10,0,0,0" Command="{Binding ScanForAppsCommand}" />
+                    </StackPanel>
                 </StackPanel>
             </Border>
 

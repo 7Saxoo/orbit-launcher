@@ -88,11 +88,15 @@ public sealed partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task AddAsync()
     {
-        var entry = await _addAppFlow.RunAsync().ConfigureAwait(true);
-        if (entry is null)
+        var outcome = await _addAppFlow.RunAsync().ConfigureAwait(true);
+        if (!outcome.ChangedLibrary)
             return;
 
-        _tileContext.Host.SetStatus($"« {entry.Name} » a été ajouté.", StatusSeverity.Success);
+        _tileContext.Host.SetStatus(
+            outcome.Added is { } entry
+                ? $"« {entry.Name} » a été ajouté."
+                : $"{outcome.Detected} application(s) importée(s).",
+            StatusSeverity.Success);
         await _tileContext.Host.RefreshAllAsync().ConfigureAwait(true);
     }
 

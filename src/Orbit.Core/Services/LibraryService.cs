@@ -75,7 +75,10 @@ public sealed class LibraryService : ILibraryService
             Description = Coalesce(request.Description, info.FileDescription),
             IconCachePath = iconPath,
             DateAdded = DateTimeOffset.Now,
-            IsFavorite = request.IsFavorite
+            IsFavorite = request.IsFavorite,
+            Publisher = Coalesce(request.Publisher, info.CompanyName),
+            Genre = Coalesce(request.Genre, null),
+            CoverImagePath = Coalesce(request.CoverImagePath, null)
         };
 
         await _repository.AddAsync(entry, ct).ConfigureAwait(false);

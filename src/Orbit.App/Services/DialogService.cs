@@ -45,14 +45,13 @@ public sealed class DialogService : IDialogService
     }
 
     public bool Confirm(string title, string message) =>
-        MessageBox.Show(Owner, message, title, MessageBoxButton.YesNo, MessageBoxImage.Question)
-            == MessageBoxResult.Yes;
+        AppDialogWindow.Show(Owner, title, message, AppDialogWindow.DialogKind.Question, confirm: true);
 
     public void ShowError(string title, string message) =>
-        MessageBox.Show(Owner, message, title, MessageBoxButton.OK, MessageBoxImage.Error);
+        AppDialogWindow.Show(Owner, title, message, AppDialogWindow.DialogKind.Error, confirm: false);
 
     public void ShowInfo(string title, string message) =>
-        MessageBox.Show(Owner, message, title, MessageBoxButton.OK, MessageBoxImage.Information);
+        AppDialogWindow.Show(Owner, title, message, AppDialogWindow.DialogKind.Info, confirm: false);
 
     public bool ShowAppForm(AppFormViewModel viewModel)
     {

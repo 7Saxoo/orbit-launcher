@@ -112,6 +112,14 @@ public partial class App : Application
                 services.AddSingleton<ILogger>(_ => Log.Logger);
                 services.AddOrbitCore(paths);
 
+                // Online game identification (inert until IGDB keys are set in Settings).
+                services.AddSingleton(_ => new System.Net.Http.HttpClient
+                {
+                    Timeout = TimeSpan.FromSeconds(25)
+                });
+                services.AddSingleton<Orbit.Core.Identification.IIdentificationProvider,
+                    Orbit.Core.Identification.IgdbGameProvider>();
+
                 services.AddSingleton<ThemeManager>();
                 services.AddSingleton<TrayIconService>();
                 services.AddSingleton<IDialogService, DialogService>();

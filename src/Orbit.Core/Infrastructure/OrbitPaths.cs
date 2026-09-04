@@ -17,6 +17,7 @@ public sealed class OrbitPaths
 
         DatabaseFile = Path.Combine(BaseDirectory, "orbit.db");
         IconCacheDirectory = Path.Combine(BaseDirectory, "icons");
+        CoverCacheDirectory = Path.Combine(BaseDirectory, "covers");
         LogDirectory = Path.Combine(BaseDirectory, "logs");
         SettingsFile = Path.Combine(BaseDirectory, "settings.json");
     }
@@ -24,6 +25,7 @@ public sealed class OrbitPaths
     public string BaseDirectory { get; }
     public string DatabaseFile { get; }
     public string IconCacheDirectory { get; }
+    public string CoverCacheDirectory { get; }
     public string LogDirectory { get; }
     public string SettingsFile { get; }
 
@@ -32,6 +34,7 @@ public sealed class OrbitPaths
     {
         Directory.CreateDirectory(BaseDirectory);
         Directory.CreateDirectory(IconCacheDirectory);
+        Directory.CreateDirectory(CoverCacheDirectory);
         Directory.CreateDirectory(LogDirectory);
     }
 }

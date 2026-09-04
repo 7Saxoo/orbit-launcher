@@ -46,5 +46,10 @@ public sealed class AppSettings
     /// <summary>Closing the window hides it to the notification area instead of quitting.</summary>
     public bool MinimizeToTrayOnClose { get; set; } = true;
 
+    // ---- Optional online identification credentials (see Identification/) ----
+    public string? IgdbClientId { get; set; }
+    public string? IgdbClientSecret { get; set; }
+    public string? SteamGridDbApiKey { get; set; }
+
     public AppSettings Clone() => (AppSettings)MemberwiseClone();
 }

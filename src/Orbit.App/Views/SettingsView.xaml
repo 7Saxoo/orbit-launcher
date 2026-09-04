@@ -116,6 +116,27 @@
                 </StackPanel>
             </Border>
 
+            <!-- Identification en ligne -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Identification en ligne (optionnel)" Style="{StaticResource Text.H2}" />
+                    <TextBlock Style="{StaticResource Text.Caption}" Margin="0,6,0,0" TextWrapping="Wrap"
+                               Text="Sans clé, l'identification automatique utilise déjà le chemin, les métadonnées Windows et WinGet. Ajoutez des clés gratuites pour enrichir les jeux (nom, éditeur, genre, jaquette)." />
+
+                    <TextBlock Text="IGDB — Client ID" Style="{StaticResource Text.Caption}" Margin="0,12,0,4" />
+                    <TextBox Style="{StaticResource TextBox.Base}"
+                             Text="{Binding IgdbClientId, UpdateSourceTrigger=LostFocus}" />
+
+                    <TextBlock Text="IGDB — Client Secret" Style="{StaticResource Text.Caption}" Margin="0,10,0,4" />
+                    <TextBox Style="{StaticResource TextBox.Base}"
+                             Text="{Binding IgdbClientSecret, UpdateSourceTrigger=LostFocus}" />
+
+                    <TextBlock Text="SteamGridDB — clé API" Style="{StaticResource Text.Caption}" Margin="0,10,0,4" />
+                    <TextBox Style="{StaticResource TextBox.Base}"
+                             Text="{Binding SteamGridDbApiKey, UpdateSourceTrigger=LostFocus}" />
+                </StackPanel>
+            </Border>
+
             <!-- Données -->
             <Border Style="{StaticResource Card}" Margin="0,0,0,14">
                 <StackPanel>

@@ -16,4 +16,9 @@ public sealed class NewAppRequest
     public string? WorkingDirectory { get; init; }
     public string? Description { get; init; }
     public bool IsFavorite { get; init; }
+
+    // Populated by the automatic identification step (optional).
+    public string? Publisher { get; init; }
+    public string? Genre { get; init; }
+    public string? CoverImagePath { get; init; }
 }

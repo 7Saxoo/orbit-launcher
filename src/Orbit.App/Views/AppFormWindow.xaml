@@ -27,6 +27,21 @@
                    Text="Enregistrez un fichier .exe dans votre bibliothèque. Le fichier d'origine n'est pas déplacé."
                    Style="{StaticResource Text.Caption}" Margin="0,0,0,8" />
 
+        <Border DockPanel.Dock="Top" Margin="0,0,0,8" Padding="12,10" CornerRadius="9"
+                Background="{DynamicResource Brush.Accent.Soft}"
+                Visibility="{Binding SupportsDetectionShortcut, Converter={StaticResource BoolToVisibility}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" VerticalAlignment="Center" TextWrapping="Wrap"
+                           Text="Vous préférez qu'Orbit trouve tout seul vos jeux et applications ?" />
+                <Button Grid.Column="1" Content="🔍  Analyser mon PC" Style="{StaticResource Button.Base}"
+                        Command="{Binding UseDetectionCommand}" />
+            </Grid>
+        </Border>
+
         <!-- Actions -->
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="0,16,0,0">
@@ -43,15 +58,23 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="0" Style="{StaticResource TextBox.Base}"
                              Text="{Binding ExecutablePath, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
                     <Button Grid.Column="1" Content="Parcourir…" Style="{StaticResource Button.Base}"
                             Margin="8,0,0,0" Command="{Binding BrowseExecutableCommand}" />
+                    <Button Grid.Column="2" Content="Analyser" Style="{StaticResource Button.Base}"
+                            Margin="8,0,0,0" Command="{Binding IdentifyCommand}"
+                            IsEnabled="{Binding IsIdentifying, Converter={StaticResource InverseBool}}" />
                 </Grid>
                 <TextBlock Style="{StaticResource Text.Caption}" Margin="0,3,0,0"
                            Text="{Binding PathHint}"
                            Visibility="{Binding PathHint, Converter={StaticResource StringToVisibility}}" />
+                <TextBlock Margin="0,4,0,0" TextWrapping="Wrap"
+                           Foreground="{DynamicResource Brush.Accent}"
+                           Text="{Binding IdentificationSummary}"
+                           Visibility="{Binding IdentificationSummary, Converter={StaticResource StringToVisibility}}" />
 
                 <TextBlock Text="Nom" Style="{StaticResource FieldLabel}" />
                 <TextBox Style="{StaticResource TextBox.Base}"

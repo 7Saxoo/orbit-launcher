@@ -22,14 +22,21 @@ public sealed partial class LibraryViewModel : ObservableObject
     private readonly ILibraryService _library;
     private readonly AppTileContext _tileContext;
     private readonly AddAppFlow _addAppFlow;
+    private readonly DetectionFlow _detectionFlow;
     private readonly ILogger _log;
     private readonly ListCollectionView _view;
 
-    public LibraryViewModel(ILibraryService library, AppTileContext tileContext, AddAppFlow addAppFlow, ILogger log)
+    public LibraryViewModel(
+        ILibraryService library,
+        AppTileContext tileContext,
+        AddAppFlow addAppFlow,
+        DetectionFlow detectionFlow,
+        ILogger log)
     {
         _library = library;
         _tileContext = tileContext;
         _addAppFlow = addAppFlow;
+        _detectionFlow = detectionFlow;
         _log = log.ForContext<LibraryViewModel>();
 
         _selectedSort = SortOptions[0];
@@ -141,16 +148,31 @@ public sealed partial class LibraryViewModel : ObservableObject
             ? Orbit.Core.Models.AppKind.Game
             : (Orbit.Core.Models.AppKind?)null;
 
-        var entry = await _addAppFlow.RunAsync(defaultKind).ConfigureAwait(true);
-        if (entry is null)
+        var outcome = await _addAppFlow.RunAsync(defaultKind).ConfigureAwait(true);
+        if (!outcome.ChangedLibrary)
             return;
 
-        _tileContext.Host.SetStatus($"« {entry.Name} » a été ajouté.", StatusSeverity.Success);
+        _tileContext.Host.SetStatus(
+            outcome.Added is { } entry
+                ? $"« {entry.Name} » a été ajouté."
+                : $"{outcome.Detected} application(s) importée(s).",
+            StatusSeverity.Success);
         await _tileContext.Host.RefreshAllAsync().ConfigureAwait(true);
     }
 
     [RelayCommand]
     private Task Reload() => RefreshAsync();
+
+    [RelayCommand]
+    private async Task ScanForAppsAsync()
+    {
+        var imported = _detectionFlow.Run();
+        if (imported <= 0)
+            return;
+
+        _tileContext.Host.SetStatus($"{imported} application(s) importée(s).", StatusSeverity.Success);
+        await _tileContext.Host.RefreshAllAsync().ConfigureAwait(true);
+    }
 
     [RelayCommand]
     private void ToggleSelectionMode() => IsSelectionMode = !IsSelectionMode;
