@@ -80,7 +80,8 @@ chemin, quelques métadonnées et une icône mise en cache.
   (plus de `MessageBox` Windows) ; transitions de section animées.
 - **Fenêtre** : « adaptée à l'écran » au premier lancement, puis taille réglable
   depuis les paramètres (1280×720, 1600×900, **1920×1080**, maximisée) et
-  mémorisée.
+  mémorisée. **Taille de l'interface** réglable (Très compacte / Compacte /
+  Normale / Grande) — mise à l'échelle globale, appliquée à chaud.
 - **Instance unique** : relancer Orbit ramène la fenêtre existante au premier
   plan au lieu d'ouvrir une seconde fenêtre.
 - **Fermeture → zone de notification** : le bouton *Fermer* garde Orbit en

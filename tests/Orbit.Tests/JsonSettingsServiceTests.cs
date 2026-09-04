@@ -19,6 +19,7 @@ public class JsonSettingsServiceTests
         Assert.Equal(AccentTemperature.Cool, service.Current.Temperature);
         Assert.True(service.Current.ConfirmBeforeRemove);
         Assert.True(service.Current.MinimizeToTrayOnClose);
+        Assert.Equal(0.85, service.Current.UiScale);
         // 0 = "fit to screen on first launch"
         Assert.Equal(0, service.Current.WindowWidth);
         Assert.Equal(0, service.Current.WindowHeight);
@@ -41,7 +42,8 @@ public class JsonSettingsServiceTests
             WindowWidth = 1920,
             WindowHeight = 1080,
             WindowMaximized = true,
-            MinimizeToTrayOnClose = false
+            MinimizeToTrayOnClose = false,
+            UiScale = 1.15
         });
 
         var reloaded = new JsonSettingsService(ws.Paths, Logger.None);
@@ -56,6 +58,7 @@ public class JsonSettingsServiceTests
         Assert.Equal(1080, reloaded.Current.WindowHeight);
         Assert.True(reloaded.Current.WindowMaximized);
         Assert.False(reloaded.Current.MinimizeToTrayOnClose);
+        Assert.Equal(1.15, reloaded.Current.UiScale);
     }
 
     [Fact]

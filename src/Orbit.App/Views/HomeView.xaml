@@ -90,7 +90,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <views:AppTile Width="300" />
+                        <views:AppTile Width="250" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -106,7 +106,7 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <views:AppTile Width="300" />
+                            <views:AppTile Width="250" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

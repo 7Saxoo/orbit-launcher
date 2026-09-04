@@ -12,6 +12,7 @@ public partial class AppFormWindow : Window
     {
         InitializeComponent();
         WindowThemeHelper.Attach(this);
+        UiScaleManager.Track(this);
 
         DataContextChanged += (_, e) =>
         {

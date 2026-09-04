@@ -16,6 +16,7 @@ public partial class AppDialogWindow : Window
     {
         InitializeComponent();
         WindowThemeHelper.Attach(this);
+        UiScaleManager.Track(this);
     }
 
     public static bool Show(Window? owner, string title, string message, DialogKind kind, bool confirm)

@@ -46,6 +46,9 @@ public sealed class AppSettings
     /// <summary>Closing the window hides it to the notification area instead of quitting.</summary>
     public bool MinimizeToTrayOnClose { get; set; } = true;
 
+    /// <summary>Global interface scale (0.7–1.3). 0.85 = compact, 1.0 = normal, 1.15 = large.</summary>
+    public double UiScale { get; set; } = 0.85;
+
     // ---- Optional online identification credentials (see Identification/) ----
     public string? IgdbClientId { get; set; }
     public string? IgdbClientSecret { get; set; }

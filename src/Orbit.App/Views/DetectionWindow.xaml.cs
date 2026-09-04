@@ -12,6 +12,7 @@ public partial class DetectionWindow : Window
     {
         InitializeComponent();
         WindowThemeHelper.Attach(this);
+        UiScaleManager.Track(this);
     }
 
     private async void OnImport(object sender, RoutedEventArgs e)

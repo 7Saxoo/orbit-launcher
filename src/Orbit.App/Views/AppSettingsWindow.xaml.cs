@@ -10,6 +10,7 @@ public partial class AppSettingsWindow : Window
     {
         InitializeComponent();
         WindowThemeHelper.Attach(this);
+        UiScaleManager.Track(this);
         DataContextChanged += (_, e) =>
         {
             if (e.OldValue is AppSettingsViewModel oldVm)

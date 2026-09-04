@@ -17,6 +17,7 @@ public partial class MainWindow : Window, IWindowService
         _settings = settings;
         InitializeComponent();
         WindowThemeHelper.Attach(this);
+        UiScaleManager.Track(this);
 
         var s = settings.Current;
         if (s.WindowWidth <= 0 || s.WindowHeight <= 0)

@@ -12,6 +12,7 @@ namespace Orbit.App.ViewModels;
 public sealed record ThemeOption(ThemePreference Value, string Label);
 public sealed record TemperatureOption(AccentTemperature Value, string Label);
 public sealed record WindowSizeOption(int Width, int Height, bool Maximized, string Label);
+public sealed record UiScaleOption(double Scale, string Label);
 
 /// <summary>Backs the "Paramètres" page.</summary>
 public sealed partial class SettingsViewModel : ObservableObject
@@ -50,6 +51,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         _selectedTemperature = TemperatureOptions[0];
         _selectedSort = SortOptions[0];
         _selectedWindowSize = WindowSizeOptions[0];
+        _selectedUiScale = UiScaleOptions[1];
         LoadFromSettings();
     }
 
@@ -86,10 +88,19 @@ public sealed partial class SettingsViewModel : ObservableObject
         new WindowSizeOption(0, 0, true, "Maximisée"),
     };
 
+    public IReadOnlyList<UiScaleOption> UiScaleOptions { get; } = new[]
+    {
+        new UiScaleOption(0.75, "Très compacte"),
+        new UiScaleOption(0.85, "Compacte"),
+        new UiScaleOption(1.00, "Normale"),
+        new UiScaleOption(1.15, "Grande"),
+    };
+
     [ObservableProperty] private ThemeOption _selectedTheme;
     [ObservableProperty] private TemperatureOption _selectedTemperature;
     [ObservableProperty] private SortOption _selectedSort;
     [ObservableProperty] private WindowSizeOption _selectedWindowSize;
+    [ObservableProperty] private UiScaleOption _selectedUiScale;
     [ObservableProperty] private bool _confirmBeforeRemove = true;
     [ObservableProperty] private bool _minimizeToTrayOnClose = true;
     [ObservableProperty] private int _entryCount;
@@ -210,6 +221,15 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     partial void OnSelectedSortChanged(SortOption value) => Persist();
 
+    partial void OnSelectedUiScaleChanged(UiScaleOption value)
+    {
+        if (_suppressPersist)
+            return;
+
+        UiScaleManager.Set(value.Scale);
+        Persist();
+    }
+
     partial void OnConfirmBeforeRemoveChanged(bool value) => Persist();
 
     partial void OnMinimizeToTrayOnCloseChanged(bool value) => Persist();
@@ -246,6 +266,9 @@ public sealed partial class SettingsViewModel : ObservableObject
                     o.Maximized == c.WindowMaximized &&
                     (c.WindowMaximized || (o.Width == c.WindowWidth && o.Height == c.WindowHeight)))
                 ?? WindowSizeOptions[0];
+            SelectedUiScale =
+                UiScaleOptions.FirstOrDefault(o => Math.Abs(o.Scale - c.UiScale) < 0.001)
+                ?? UiScaleOptions[1];
         }
         finally
         {
@@ -264,6 +287,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         updated.Sort = SelectedSort.Value;
         updated.ConfirmBeforeRemove = ConfirmBeforeRemove;
         updated.MinimizeToTrayOnClose = MinimizeToTrayOnClose;
+        updated.UiScale = SelectedUiScale.Scale;
         updated.IgdbClientId = Blank(IgdbClientId);
         updated.IgdbClientSecret = Blank(IgdbClientSecret);
         updated.SteamGridDbApiKey = Blank(SteamGridDbApiKey);

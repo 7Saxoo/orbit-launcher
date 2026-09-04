@@ -49,6 +49,20 @@
                                   ItemsSource="{Binding TemperatureOptions}" SelectedItem="{Binding SelectedTemperature}"
                                   ItemTemplate="{StaticResource LabelOnly}" />
                     </Grid>
+
+                    <Grid Margin="0,14,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Taille de l'interface" />
+                            <TextBlock Text="Densité générale de l'affichage" Style="{StaticResource Text.Caption}" />
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" Width="190" Style="{StaticResource ComboBox.Base}"
+                                  ItemsSource="{Binding UiScaleOptions}" SelectedItem="{Binding SelectedUiScale}"
+                                  ItemTemplate="{StaticResource LabelOnly}" />
+                    </Grid>
                 </StackPanel>
             </Border>
 
