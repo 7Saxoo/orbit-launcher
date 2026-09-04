@@ -21,4 +21,7 @@ public sealed class NewAppRequest
     public string? Publisher { get; init; }
     public string? Genre { get; init; }
     public string? CoverImagePath { get; init; }
+
+    /// <summary>Extra icon source tried before the executable (e.g. a registry DisplayIcon).</summary>
+    public string? IconSourceHint { get; init; }
 }

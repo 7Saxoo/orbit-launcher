@@ -61,7 +61,9 @@ public sealed class LibraryService : ILibraryService
         var name = Coalesce(request.Name, info.SuggestedName)
                    ?? Path.GetFileNameWithoutExtension(info.NormalizedPath);
 
-        var iconPath = await _icons.EnsureIconAsync(info.NormalizedPath, ct).ConfigureAwait(false);
+        var iconPath = await _icons
+            .EnsureIconAsync(info.NormalizedPath, request.IconSourceHint, ct)
+            .ConfigureAwait(false);
 
         var entry = new AppEntry
         {
@@ -102,7 +104,9 @@ public sealed class LibraryService : ILibraryService
                     Name = app.Name,
                     Kind = app.Kind,
                     Category = app.Category,
-                    Description = app.Publisher is { } p ? $"Éditeur : {p}" : null
+                    Description = app.Publisher is { } p ? $"Éditeur : {p}" : null,
+                    Publisher = app.Publisher,
+                    IconSourceHint = app.IconSource
                 }, ct).ConfigureAwait(false);
                 added++;
             }
@@ -151,6 +155,34 @@ public sealed class LibraryService : ILibraryService
     {
         await _repository.DeleteAsync(id, ct).ConfigureAwait(false);
         _log.Information("Removed entry {Id} (executable left untouched on disk)", id);
+    }
+
+    public async Task<int> RefreshIconsAsync(CancellationToken ct = default)
+    {
+        var entries = await _repository.GetAllAsync(ct).ConfigureAwait(false);
+        var changed = 0;
+
+        foreach (var entry in entries)
+        {
+            ct.ThrowIfCancellationRequested();
+            try
+            {
+                var icon = await _icons.EnsureIconAsync(entry.ExecutablePath, ct).ConfigureAwait(false);
+                if (icon is not null && !string.Equals(icon, entry.IconCachePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    entry.IconCachePath = icon;
+                    await _repository.UpdateAsync(entry, ct).ConfigureAwait(false);
+                    changed++;
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Warning(ex, "Could not refresh icon for {Id}", entry.Id);
+            }
+        }
+
+        _log.Information("Refreshed icons: {Changed}/{Total} updated", changed, entries.Count);
+        return changed;
     }
 
     public async Task<int> RemoveManyAsync(IEnumerable<Guid> ids, CancellationToken ct = default)

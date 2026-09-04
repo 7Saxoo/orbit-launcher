@@ -14,11 +14,23 @@
         d:DataContext="{d:DesignInstance vm:MainViewModel}">
 
     <Window.Resources>
-        <Style x:Key="NavBadge" TargetType="Border">
-            <Setter Property="Background" Value="{DynamicResource Brush.Surface.Hover}" />
-            <Setter Property="CornerRadius" Value="9" />
-            <Setter Property="Padding" Value="7,1" />
+        <Style x:Key="NavGlyph" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource Font.Icons}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Width" Value="22" />
             <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Left" />
+        </Style>
+        <Style x:Key="NavCount" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Opacity" Value="0.65" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Style.Triggers>
+                <Trigger Property="Text" Value="0">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
 
@@ -33,78 +45,102 @@
                 BorderBrush="{DynamicResource Brush.Surface.Border}" BorderThickness="0,0,1,0">
             <DockPanel LastChildFill="True">
 
-                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="18,20,18,16">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="18,18,18,14">
                     <Image Source="pack://application:,,,/Orbit;component/Assets/orbit-mark.png"
-                           Width="34" Height="34" VerticalAlignment="Center" />
-                    <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="ORBIT" FontSize="18" FontWeight="Bold" />
-                        <TextBlock Text="Jeux &amp; applications" Style="{StaticResource Text.Caption}" />
-                    </StackPanel>
+                           Width="28" Height="28" VerticalAlignment="Center" />
+                    <TextBlock Text="ORBIT" FontSize="16" FontWeight="Bold" Margin="10,0,0,0"
+                               VerticalAlignment="Center" />
                 </StackPanel>
 
-                <StackPanel DockPanel.Dock="Bottom" Margin="8,8,8,10">
+                <StackPanel DockPanel.Dock="Bottom" Margin="6,8,6,10">
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Settings}"
                                  IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Settings}">
-                        <TextBlock Text="⚙   Paramètres" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource NavGlyph}" Text="&#xE713;" />
+                            <TextBlock Text="Paramètres" VerticalAlignment="Center" />
+                        </StackPanel>
                     </RadioButton>
                 </StackPanel>
 
-                <StackPanel Margin="8,4,8,8">
+                <StackPanel Margin="6,2,6,8">
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Home}"
                                  IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Home}">
-                        <TextBlock Text="🏠   Accueil" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource NavGlyph}" Text="&#xE80F;" />
+                            <TextBlock Text="Accueil" VerticalAlignment="Center" />
+                        </StackPanel>
                     </RadioButton>
 
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Library}"
                                  IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Library}">
-                        <DockPanel>
-                            <Border Style="{StaticResource NavBadge}" DockPanel.Dock="Right">
-                                <TextBlock Text="{Binding Home.TotalCount}" FontSize="11" />
-                            </Border>
-                            <TextBlock Text="📚   Bibliothèque" />
-                        </DockPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Style="{StaticResource NavGlyph}" Text="&#xE8F1;" />
+                            <TextBlock Grid.Column="1" Text="Bibliothèque" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Style="{StaticResource NavCount}"
+                                       Text="{Binding Home.TotalCount}" />
+                        </Grid>
                     </RadioButton>
 
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Games}"
                                  IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Games}">
-                        <DockPanel>
-                            <Border Style="{StaticResource NavBadge}" DockPanel.Dock="Right">
-                                <TextBlock Text="{Binding Home.GamesCount}" FontSize="11" />
-                            </Border>
-                            <TextBlock Text="🎮   Jeux" />
-                        </DockPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Style="{StaticResource NavGlyph}" Text="&#xE7FC;" />
+                            <TextBlock Grid.Column="1" Text="Jeux" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Style="{StaticResource NavCount}"
+                                       Text="{Binding Home.GamesCount}" />
+                        </Grid>
                     </RadioButton>
 
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Applications}"
                                  IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Applications}">
-                        <DockPanel>
-                            <Border Style="{StaticResource NavBadge}" DockPanel.Dock="Right">
-                                <TextBlock Text="{Binding Home.ApplicationsCount}" FontSize="11" />
-                            </Border>
-                            <TextBlock Text="🧩   Applications" />
-                        </DockPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Style="{StaticResource NavGlyph}" Text="&#xE71D;" />
+                            <TextBlock Grid.Column="1" Text="Applications" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Style="{StaticResource NavCount}"
+                                       Text="{Binding Home.ApplicationsCount}" />
+                        </Grid>
                     </RadioButton>
 
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Favorites}"
                                  IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Favorites}">
-                        <DockPanel>
-                            <Border Style="{StaticResource NavBadge}" DockPanel.Dock="Right">
-                                <TextBlock Text="{Binding Home.FavoritesCount}" FontSize="11" />
-                            </Border>
-                            <TextBlock Text="⭐   Favoris" />
-                        </DockPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Style="{StaticResource NavGlyph}" Text="&#xE734;" />
+                            <TextBlock Grid.Column="1" Text="Favoris" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Style="{StaticResource NavCount}"
+                                       Text="{Binding Home.FavoritesCount}" />
+                        </Grid>
                     </RadioButton>
                 </StackPanel>
             </DockPanel>
@@ -120,21 +156,35 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0" MaxWidth="440" HorizontalAlignment="Left"
+                    <Grid Grid.Column="0" MaxWidth="420" HorizontalAlignment="Left"
                           Visibility="{Binding IsSearchVisible, Converter={StaticResource BoolToVisibility}}">
-                        <TextBox x:Name="SearchBox" Style="{StaticResource TextBox.Base}"
+                        <TextBox x:Name="SearchBox" Style="{StaticResource TextBox.Base}" Padding="30,8,10,8"
                                  Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, Delay=150}" />
-                        <TextBlock Text="🔍  Rechercher…" IsHitTestVisible="False"
-                                   Margin="12,0,0,0" VerticalAlignment="Center"
+                        <TextBlock Text="&#xE721;" FontFamily="{StaticResource Font.Icons}" FontSize="12"
+                                   IsHitTestVisible="False" Margin="11,0,0,0" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource Brush.Text.Secondary}" />
+                        <TextBlock Text="Rechercher…" IsHitTestVisible="False"
+                                   Margin="30,0,0,0" VerticalAlignment="Center"
                                    Foreground="{DynamicResource Brush.Text.Secondary}"
                                    Visibility="{Binding Text, ElementName=SearchBox, Converter={StaticResource StringToVisibility}, ConverterParameter=invert}" />
                     </Grid>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Button Content="⟳  Actualiser" Style="{StaticResource Button.Base}" Margin="0,0,10,0"
-                                Command="{Binding Library.ReloadCommand}" />
-                        <Button Content="＋  Ajouter" Style="{StaticResource Button.Accent}"
-                                Command="{Binding Library.AddCommand}" />
+                        <Button Style="{StaticResource Button.Base}" Margin="0,0,10,0"
+                                Command="{Binding Library.ReloadCommand}" ToolTip="Actualiser">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE72C;" FontFamily="{StaticResource Font.Icons}" FontSize="12"
+                                           VerticalAlignment="Center" Margin="0,0,7,0" />
+                                <TextBlock Text="Actualiser" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource Button.Accent}" Command="{Binding Library.AddCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE710;" FontFamily="{StaticResource Font.Icons}" FontSize="12"
+                                           VerticalAlignment="Center" Margin="0,0,7,0" />
+                                <TextBlock Text="Ajouter" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -150,7 +200,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Style="{StaticResource Text.Caption}"
-                               Text="Orbit v1.3.0 · developed by Saxo" />
+                               Text="Orbit v1.4.0 · developed by Saxo" />
                     <TextBlock Grid.Column="1" Style="{StaticResource Text.Caption}" Margin="16,0,0,0"
                                Text="{Binding StatusMessage}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Column="2" Style="{StaticResource Text.Caption}"

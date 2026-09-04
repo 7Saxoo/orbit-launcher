@@ -43,8 +43,11 @@ chemin, quelques métadonnées et une icône mise en cache.
   **Steam** (bibliothèques + manifestes), **Epic Games** (manifestes) et de la
   **liste des programmes installés de Windows** (registre). L'utilisateur coche
   ce qu'il veut importer ; rien n'est ajouté sans son accord.
-- **Icône automatique** : l'icône du `.exe` est extraite une seule fois, convertie
-  en PNG et mise en cache. Une icône par défaut est utilisée en cas d'échec.
+- **Icône automatique** : extraction en grandes tailles (jusqu'à 256 px). Si
+  l'exécutable n'a pas d'icône (`git.exe`, `mysqld.exe`…), Orbit essaie l'icône
+  de l'installeur (registre `DisplayIcon`), puis un `.ico` ou un `.exe` voisin,
+  et rejette l'icône « exécutable générique » de Windows. Bouton *Rafraîchir les
+  icônes* dans les paramètres pour ré-extraire toute la bibliothèque.
 - **Lancer** une application (via `ShellExecute`, sans passer par `cmd.exe`), avec
   gestion des chemins contenant des espaces ou des accents, du dossier de travail,
   d'arguments optionnels, des refus d'accès et des demandes d'élévation UAC.
@@ -77,8 +80,10 @@ chemin, quelques métadonnées et une icône mise en cache.
   plan au lieu d'ouvrir une seconde fenêtre.
 - **Fermeture → zone de notification** : le bouton *Fermer* garde Orbit en
   arrière-plan avec une **consommation réduite** (priorité processus abaissée,
-  mémoire de travail relâchée) ; le bouton *Réduire* reste une réduction
-  classique. Menu de la zone de notification : Ouvrir / Quitter.
+  mémoire de travail relâchée), sans notification ; le bouton *Réduire* reste
+  une réduction classique. Comportement **désactivable** dans *Paramètres →
+  Fenêtre* (fermer quitte alors l'application). Le menu de la zone de
+  notification (Ouvrir / Quitter) s'ouvre **au niveau du curseur**.
 - **Persistance locale** en SQLite : les données survivent à la fermeture, au
   redémarrage du PC et à une mise à jour de l'application.
 - **Journalisation** dans des fichiers rotatifs quotidiens.
@@ -98,7 +103,7 @@ chemin, quelques métadonnées et une icône mise en cache.
 | Injection de dépendances | `Microsoft.Extensions.Hosting` / `DependencyInjection` | Composition centralisée. |
 | Journalisation | **Serilog** (`Sinks.File`, `Sinks.Debug`) | Fichiers rotatifs, format lisible. |
 | Zone de notification | **Hardcodet.NotifyIcon.Wpf** | Icône de tray + menu, sans dépendance WinForms. |
-| Tests | **xUnit** | 107 tests unitaires et d'intégration. |
+| Tests | **xUnit** | 111 tests unitaires et d'intégration. |
 
 ---
 
@@ -294,7 +299,7 @@ d'installation, qui peut être en lecture seule) :
 dotnet test
 ```
 
-**107 tests** (xUnit), notamment :
+**111 tests** (xUnit), notamment :
 
 - **`PathHelperTests`** — normalisation (guillemets, espaces, variables
   d'environnement, accents), comparaison de chemins insensible à la casse et au
@@ -321,7 +326,7 @@ dotnet test
   fichier → correction du chemin → lancement ; et réinitialisation qui n'altère
   jamais le `.exe` source.
 
-Résultat de la dernière exécution : **107 réussis, 0 échec**.
+Résultat de la dernière exécution : **111 réussis, 0 échec**.
 
 En complément, l'application a été **réellement démarrée** (build Release) :
 création de `orbit.db` + migration, écriture de `settings.json`, initialisation de

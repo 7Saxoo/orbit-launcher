@@ -98,7 +98,8 @@ public sealed class RegistryUninstallSource : IInstalledAppSource
             Category = "Programmes installés",
             Source = "Programmes installés",
             Publisher = string.IsNullOrWhiteSpace(publisher) ? null : publisher,
-            InstallLocation = installLocation
+            InstallLocation = installLocation,
+            IconSource = string.IsNullOrWhiteSpace(displayIcon) ? null : displayIcon
         };
     }
 

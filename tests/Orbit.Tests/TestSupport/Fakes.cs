@@ -123,10 +123,15 @@ public sealed class FakeIconService : IIconService
 {
     public string? Result { get; set; } = @"C:\cache\icon.png";
     public List<string> Requests { get; } = new();
+    public List<string?> Hints { get; } = new();
 
-    public Task<string?> EnsureIconAsync(string executablePath, CancellationToken ct = default)
+    public Task<string?> EnsureIconAsync(string executablePath, CancellationToken ct = default) =>
+        EnsureIconAsync(executablePath, null, ct);
+
+    public Task<string?> EnsureIconAsync(string executablePath, string? iconHint, CancellationToken ct = default)
     {
         Requests.Add(executablePath);
+        Hints.Add(iconHint);
         return Task.FromResult(Result);
     }
 }

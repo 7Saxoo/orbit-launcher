@@ -139,6 +139,25 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task RefreshIconsAsync()
+    {
+        try
+        {
+            var changed = await _library.RefreshIconsAsync().ConfigureAwait(true);
+            if (Host is not null)
+                await Host.RefreshAllAsync().ConfigureAwait(true);
+            Host?.SetStatus(
+                changed > 0 ? $"{changed} icône(s) mise(s) à jour." : "Icônes déjà à jour.",
+                StatusSeverity.Success);
+        }
+        catch (Exception ex)
+        {
+            _log.Error(ex, "Icon refresh failed");
+            _dialogs.ShowError("Rafraîchissement impossible", ex.Message);
+        }
+    }
+
+    [RelayCommand]
     private void OpenDataFolder()
     {
         _paths.EnsureDirectories();

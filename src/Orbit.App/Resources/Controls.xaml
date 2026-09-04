@@ -5,6 +5,9 @@
     <!-- Poppins is embedded under Assets/Fonts; the system stack is the fallback. -->
     <FontFamily x:Key="Font.Primary">pack://application:,,,/Orbit;component/Assets/Fonts/#Poppins</FontFamily>
 
+    <!-- Windows symbol font for crisp, uniformly-sized navigation icons. -->
+    <FontFamily x:Key="Font.Icons">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+
     <!-- ==================== Typography ==================== -->
 
     <Style x:Key="Text.Body" TargetType="TextBlock">
@@ -125,17 +128,18 @@
     <Style x:Key="NavItem" TargetType="RadioButton">
         <Setter Property="FontFamily" Value="{StaticResource Font.Primary}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Secondary}" />
-        <Setter Property="FontSize" Value="13" />
-        <Setter Property="Margin" Value="8,2" />
-        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Margin" Value="6,1" />
+        <Setter Property="Padding" Value="10,7" />
         <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="Root" Background="Transparent" CornerRadius="9"
+                    <Border x:Name="Root" Background="Transparent" CornerRadius="8"
                             Padding="{TemplateBinding Padding}">
-                        <ContentPresenter VerticalAlignment="Center" />
+                        <ContentPresenter VerticalAlignment="Center"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">

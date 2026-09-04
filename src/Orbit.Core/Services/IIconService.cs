@@ -13,4 +13,10 @@ public interface IIconService
     /// obtained – callers should fall back to a default image.
     /// </summary>
     Task<string?> EnsureIconAsync(string executablePath, CancellationToken ct = default);
+
+    /// <summary>
+    /// Same, but with an extra icon source to try first (e.g. an installer's
+    /// <c>DisplayIcon</c> registry value pointing at a <c>.ico</c>).
+    /// </summary>
+    Task<string?> EnsureIconAsync(string executablePath, string? iconHint, CancellationToken ct = default);
 }

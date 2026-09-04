@@ -19,4 +19,7 @@ public sealed record DetectedApp
     public string Source { get; init; } = string.Empty;
 
     public string? InstallLocation { get; init; }
+
+    /// <summary>Extra icon source (e.g. an installer's <c>DisplayIcon</c>), tried before the exe.</summary>
+    public string? IconSource { get; init; }
 }

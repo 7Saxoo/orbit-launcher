@@ -48,4 +48,62 @@ public class IconServiceTests
 
         Assert.Null(result);
     }
+
+    [Fact]
+    public async Task EnsureIcon_uses_a_sibling_ico_when_the_exe_has_none()
+    {
+        using var ws = new TempWorkspace();
+        var service = new IconService(ws.Paths, Logger.None);
+
+        // A tiny data file masquerading as an .exe (no icon resource at all).
+        var appDir = Path.Combine(ws.Root, "SomeApp");
+        Directory.CreateDirectory(appDir);
+        var exe = Path.Combine(appDir, "someapp.exe");
+        await File.WriteAllBytesAsync(exe, new byte[512]);
+
+        // A genuine .ico next to it.
+        WriteSolidIco(Path.Combine(appDir, "someapp.ico"));
+
+        var result = await service.EnsureIconAsync(exe, iconHint: null);
+
+        Assert.NotNull(result);
+        Assert.True(File.Exists(result));
+    }
+
+    private static void WriteSolidIco(string path)
+    {
+        using var bmp = new System.Drawing.Bitmap(32, 32);
+        using (var g = System.Drawing.Graphics.FromImage(bmp))
+            g.Clear(System.Drawing.Color.OrangeRed);
+
+        var hicon = bmp.GetHicon();
+        try
+        {
+            using var icon = System.Drawing.Icon.FromHandle(hicon);
+            using var fs = File.Create(path);
+            icon.Save(fs);
+        }
+        finally
+        {
+            NativeDestroyIcon(hicon);
+        }
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "DestroyIcon")]
+    private static extern bool NativeDestroyIcon(IntPtr handle);
+
+    [Fact]
+    public async Task EnsureIcon_prefers_an_explicit_hint()
+    {
+        using var ws = new TempWorkspace();
+        var service = new IconService(ws.Paths, Logger.None);
+
+        var exe = Path.Combine(ws.Root, "plain.exe");
+        await File.WriteAllBytesAsync(exe, new byte[256]);
+
+        var result = await service.EnsureIconAsync(exe, iconHint: $"{ThisProcessExe},0");
+
+        Assert.NotNull(result);
+        Assert.True(File.Exists(result));
+    }
 }

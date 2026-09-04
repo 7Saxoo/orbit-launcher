@@ -46,4 +46,8 @@ public interface ILibraryService
     /// <summary>Removes every entry and clears the icon cache. Irreversible –
     /// callers must confirm with the user first.</summary>
     Task ResetAsync(CancellationToken ct = default);
+
+    /// <summary>Re-extracts the icon of every entry (folder fallback + large sizes).
+    /// Returns how many entries got a different icon.</summary>
+    Task<int> RefreshIconsAsync(CancellationToken ct = default);
 }

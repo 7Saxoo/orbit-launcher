@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media.Imaging;
 using Hardcodet.Wpf.TaskbarNotification;
 using Orbit.Core.Services;
@@ -10,8 +11,9 @@ namespace Orbit.App.Infrastructure;
 
 /// <summary>
 /// Puts Orbit in the notification area. Closing the main window hides it there
-/// (and drops power use) instead of quitting, unless the user turned that off or
-/// picked "Quitter" from the tray menu.
+/// (and drops power use) instead of quitting, unless the user turned that off in
+/// Settings or picked "Quitter" from the tray menu. The menu opens at the mouse,
+/// next to the icon.
 /// </summary>
 public sealed class TrayIconService : IDisposable
 {
@@ -19,6 +21,7 @@ public sealed class TrayIconService : IDisposable
     private readonly ILogger _log;
 
     private TaskbarIcon? _tray;
+    private ContextMenu? _menu;
     private Window? _window;
     private bool _exiting;
 
@@ -31,36 +34,46 @@ public sealed class TrayIconService : IDisposable
     public void Attach(Window window)
     {
         _window = window;
+        _menu = BuildMenu();
 
         _tray = new TaskbarIcon
         {
             ToolTipText = "Orbit",
             IconSource = new BitmapImage(
-                new Uri("pack://application:,,,/Orbit;component/Assets/orbit.ico", UriKind.Absolute)),
-            ContextMenu = BuildMenu()
+                new Uri("pack://application:,,,/Orbit;component/Assets/orbit.ico", UriKind.Absolute))
         };
         _tray.TrayMouseDoubleClick += (_, _) => Restore();
+        _tray.TrayLeftMouseUp += (_, _) => Restore();
+        _tray.TrayRightMouseUp += (_, _) => OpenMenuAtMouse();
 
-        // Only *closing* the window sends Orbit to the tray. Minimising with the
-        // caption button behaves like a normal window minimise.
         window.Closing += OnClosing;
         Application.Current.Exit += (_, _) => Dispose();
     }
 
     private ContextMenu BuildMenu()
     {
-        var menu = new ContextMenu();
-
         var open = new MenuItem { Header = "Ouvrir Orbit" };
         open.Click += (_, _) => Restore();
 
         var quit = new MenuItem { Header = "Quitter" };
         quit.Click += (_, _) => QuitReally();
 
+        var menu = new ContextMenu { Placement = PlacementMode.MousePoint, StaysOpen = false };
         menu.Items.Add(open);
         menu.Items.Add(new Separator());
         menu.Items.Add(quit);
         return menu;
+    }
+
+    private void OpenMenuAtMouse()
+    {
+        if (_menu is null)
+            return;
+
+        // Own the popup ourselves so it appears at the cursor (next to the icon)
+        // instead of the screen corner, even while the main window is hidden.
+        _menu.Placement = PlacementMode.MousePoint;
+        _menu.IsOpen = true;
     }
 
     private void OnClosing(object? sender, CancelEventArgs e)
@@ -79,16 +92,6 @@ public sealed class TrayIconService : IDisposable
 
         _window.Hide();
         PowerManager.EnterLowPower();
-        try
-        {
-            _tray?.ShowBalloonTip("Orbit",
-                "Toujours là, en arrière-plan — double-cliquez l'icône pour revenir.", BalloonIcon.Info);
-        }
-        catch (Exception ex)
-        {
-            _log.Debug(ex, "Balloon tip failed");
-        }
-
         _log.Information("Orbit hidden to tray, low-power mode engaged");
     }
 
@@ -96,6 +99,9 @@ public sealed class TrayIconService : IDisposable
     {
         if (_window is null)
             return;
+
+        if (_menu is not null)
+            _menu.IsOpen = false;
 
         PowerManager.ExitLowPower();
         _window.Show();
@@ -115,6 +121,8 @@ public sealed class TrayIconService : IDisposable
 
     public void Dispose()
     {
+        if (_menu is not null)
+            _menu.IsOpen = false;
         _tray?.Dispose();
         _tray = null;
     }

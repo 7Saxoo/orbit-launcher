@@ -159,6 +159,35 @@ public class LibraryServiceTests
     }
 
     [Fact]
+    public async Task ImportAsync_passes_the_registry_icon_hint_to_the_icon_service()
+    {
+        await _service.ImportAsync(new[]
+        {
+            new DetectedApp
+            {
+                Name = "Git", ExecutablePath = @"C:\Program Files\Git\bin\git.exe",
+                Kind = AppKind.Application, Source = "Programmes installés",
+                IconSource = @"C:\Program Files\Git\git-bash.exe,0"
+            }
+        });
+
+        Assert.Contains(@"C:\Program Files\Git\git-bash.exe,0", _icons.Hints);
+    }
+
+    [Fact]
+    public async Task RefreshIconsAsync_updates_entries_whose_icon_changed()
+    {
+        var a = await _service.AddAsync(Request(@"C:\A\a.exe", "A"));
+        _icons.Result = @"C:\cache\new-icon.png";
+
+        var changed = await _service.RefreshIconsAsync();
+
+        Assert.Equal(1, changed);
+        var reloaded = await _repo.GetByIdAsync(a.Id);
+        Assert.Equal(@"C:\cache\new-icon.png", reloaded!.IconCachePath);
+    }
+
+    [Fact]
     public async Task ImportAsync_adds_new_entries_and_skips_duplicates()
     {
         await _service.AddAsync(Request(@"C:\Games\Existing\game.exe", "Existing"));

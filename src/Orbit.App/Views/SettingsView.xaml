@@ -72,7 +72,9 @@
                     </Grid>
 
                     <CheckBox Margin="0,16,0,0" IsChecked="{Binding MinimizeToTrayOnClose}"
-                              Content="Réduire dans la zone de notification à la fermeture (consommation réduite)" />
+                              Content="Réduire dans la zone de notification à la fermeture" />
+                    <TextBlock Style="{StaticResource Text.Caption}" Margin="27,3,0,0" TextWrapping="Wrap"
+                               Text="Activé : fermer la fenêtre garde Orbit en arrière-plan (consommation réduite). Désactivé : fermer la fenêtre quitte l'application." />
                 </StackPanel>
             </Border>
 
@@ -98,6 +100,12 @@
 
                     <CheckBox Margin="0,14,0,0" IsChecked="{Binding ConfirmBeforeRemove}"
                               Content="Demander confirmation avant de retirer une application" />
+
+                    <Button Content="🖼  Rafraîchir les icônes" Style="{StaticResource Button.Base}"
+                            HorizontalAlignment="Left" Margin="0,14,0,0"
+                            Command="{Binding RefreshIconsCommand}" />
+                    <TextBlock Style="{StaticResource Text.Caption}" Margin="0,4,0,0" TextWrapping="Wrap"
+                               Text="Ré-extrait le logo de chaque entrée (recherche aussi un .ico ou un .exe voisin)." />
 
                     <TextBlock Margin="0,16,0,0" Style="{StaticResource Text.Caption}"
                                Text="{Binding EntryCount, StringFormat='{}{0} application(s) enregistrée(s)'}" />
