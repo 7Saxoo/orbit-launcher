@@ -108,4 +108,33 @@ public class ProcessLauncherTests
         entry.JavaMaxMemoryMb = mb;
         Assert.Equal(expected, ProcessLauncher.ComposeArguments(entry));
     }
+
+    [Fact]
+    public void Launch_uses_the_launch_uri_when_set_and_ignores_a_missing_exe()
+    {
+        _inspector.Exists = false; // exe would normally block the launch
+        var launcher = Build(_ => null);
+        var entry = Entry(path: @"C:\gone\game.exe");
+        entry.LaunchUri = "steam://rungameid/292030";
+
+        var outcome = launcher.Launch(entry);
+
+        Assert.Equal(LaunchStatus.Started, outcome.Status);
+        Assert.Equal("steam://rungameid/292030", _captured!.FileName);
+        Assert.Empty(_captured.Arguments);
+        Assert.True(_captured.UseShellExecute);
+    }
+
+    [Fact]
+    public void Launch_via_steam_uri_reports_a_friendly_error_on_failure()
+    {
+        var launcher = Build(_ => throw new Win32Exception(2)); // "file not found"
+        var entry = Entry();
+        entry.LaunchUri = "steam://rungameid/1";
+
+        var outcome = launcher.Launch(entry);
+
+        Assert.Equal(LaunchStatus.Failed, outcome.Status);
+        Assert.Contains("Steam", outcome.Message, StringComparison.OrdinalIgnoreCase);
+    }
 }

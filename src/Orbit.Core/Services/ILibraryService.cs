@@ -43,6 +43,10 @@ public interface ILibraryService
     /// <summary>Best-effort check for an already-running instance of the entry's executable.</summary>
     bool IsRunning(AppEntry entry);
 
+    /// <summary>Lower-cased image names of every running process – one snapshot to
+    /// test many tiles against.</summary>
+    IReadOnlySet<string> GetRunningImageNames();
+
     /// <summary>Removes every entry and clears the icon cache. Irreversible –
     /// callers must confirm with the user first.</summary>
     Task ResetAsync(CancellationToken ct = default);

@@ -28,6 +28,14 @@ public sealed class AppEntry
     public bool RunAsAdmin { get; set; }
 
     /// <summary>
+    /// When set, Orbit launches this instead of the executable — e.g.
+    /// <c>steam://rungameid/&lt;appid&gt;</c> so Steam DRM/overlay initialise
+    /// correctly. The executable path is still kept for the icon and for the
+    /// "file missing" indicator.
+    /// </summary>
+    public string? LaunchUri { get; set; }
+
+    /// <summary>
     /// Optional max heap for Java-based games/apps. When set, Orbit prepends
     /// <c>-Xmx&lt;n&gt;M -Xms&lt;n&gt;M</c> to the arguments.
     /// </summary>

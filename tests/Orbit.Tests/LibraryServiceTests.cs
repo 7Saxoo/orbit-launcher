@@ -159,6 +159,30 @@ public class LibraryServiceTests
     }
 
     [Fact]
+    public async Task Steam_import_stores_a_launch_uri_and_launch_ignores_a_missing_exe()
+    {
+        await _service.ImportAsync(new[]
+        {
+            new DetectedApp
+            {
+                Name = "The Witcher 3", ExecutablePath = @"D:\SteamLibrary\steamapps\common\The Witcher 3\witcher3.exe",
+                Kind = AppKind.Game, Source = "Steam", LaunchUri = "steam://rungameid/292030"
+            }
+        });
+
+        var entry = Assert.Single(_repo.Snapshot);
+        Assert.Equal("steam://rungameid/292030", entry.LaunchUri);
+
+        // Exe reported missing – a Steam entry must still launch via its URI.
+        _inspector.Exists = false;
+        _launcher.NextOutcome = LaunchOutcome.Ok("The Witcher 3");
+        var outcome = await _service.LaunchAsync(entry.Id);
+
+        Assert.True(outcome.Succeeded);
+        Assert.Single(_launcher.Launched);
+    }
+
+    [Fact]
     public async Task ImportAsync_passes_the_registry_icon_hint_to_the_icon_service()
     {
         await _service.ImportAsync(new[]

@@ -16,4 +16,10 @@ public interface IProcessLauncher
     /// name. Used only to warn the user; it never blocks a launch.
     /// </summary>
     bool IsRunning(AppEntry entry);
+
+    /// <summary>
+    /// Lower-cased image names (without extension) of every currently running
+    /// process – one enumeration to test many entries against.
+    /// </summary>
+    IReadOnlySet<string> GetRunningImageNames();
 }

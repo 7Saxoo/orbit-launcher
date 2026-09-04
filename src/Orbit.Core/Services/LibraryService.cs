@@ -80,7 +80,8 @@ public sealed class LibraryService : ILibraryService
             IsFavorite = request.IsFavorite,
             Publisher = Coalesce(request.Publisher, info.CompanyName),
             Genre = Coalesce(request.Genre, null),
-            CoverImagePath = Coalesce(request.CoverImagePath, null)
+            CoverImagePath = Coalesce(request.CoverImagePath, null),
+            LaunchUri = Coalesce(request.LaunchUri, null)
         };
 
         await _repository.AddAsync(entry, ct).ConfigureAwait(false);
@@ -106,7 +107,8 @@ public sealed class LibraryService : ILibraryService
                     Category = app.Category,
                     Description = app.Publisher is { } p ? $"Éditeur : {p}" : null,
                     Publisher = app.Publisher,
-                    IconSourceHint = app.IconSource
+                    IconSourceHint = app.IconSource,
+                    LaunchUri = app.LaunchUri
                 }, ct).ConfigureAwait(false);
                 added++;
             }
@@ -228,14 +230,19 @@ public sealed class LibraryService : ILibraryService
 
         // Guard here as well as in the launcher: the service contract is "a
         // missing file never counts as a launch", independent of the launcher.
-        switch (_inspector.Evaluate(entry.ExecutablePath))
+        // Entries with a launch URI (Steam etc.) are launched by that URI, so a
+        // missing exe must not block them.
+        if (string.IsNullOrWhiteSpace(entry.LaunchUri))
         {
-            case AppAvailability.Missing:
-                return new LaunchOutcome(LaunchStatus.FileNotFound,
-                    $"Le fichier est introuvable :\n{entry.ExecutablePath}");
-            case AppAvailability.Invalid:
-                return new LaunchOutcome(LaunchStatus.NotAnExecutable,
-                    $"Ce fichier n'est pas un exécutable (.exe) :\n{entry.ExecutablePath}");
+            switch (_inspector.Evaluate(entry.ExecutablePath))
+            {
+                case AppAvailability.Missing:
+                    return new LaunchOutcome(LaunchStatus.FileNotFound,
+                        $"Le fichier est introuvable :\n{entry.ExecutablePath}");
+                case AppAvailability.Invalid:
+                    return new LaunchOutcome(LaunchStatus.NotAnExecutable,
+                        $"Ce fichier n'est pas un exécutable (.exe) :\n{entry.ExecutablePath}");
+            }
         }
 
         var outcome = _launcher.Launch(entry);
@@ -249,6 +256,8 @@ public sealed class LibraryService : ILibraryService
         _inspector.Evaluate(entry.ExecutablePath);
 
     public bool IsRunning(AppEntry entry) => _launcher.IsRunning(entry);
+
+    public IReadOnlySet<string> GetRunningImageNames() => _launcher.GetRunningImageNames();
 
     public async Task ResetAsync(CancellationToken ct = default)
     {

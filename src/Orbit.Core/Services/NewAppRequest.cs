@@ -24,4 +24,7 @@ public sealed class NewAppRequest
 
     /// <summary>Extra icon source tried before the executable (e.g. a registry DisplayIcon).</summary>
     public string? IconSourceHint { get; init; }
+
+    /// <summary>Preferred launch target (e.g. <c>steam://rungameid/&lt;appid&gt;</c>).</summary>
+    public string? LaunchUri { get; init; }
 }

@@ -48,6 +48,7 @@ public sealed partial class AppSettingsViewModel : ObservableValidator
         _arguments = entry.Arguments ?? string.Empty;
         _runAsAdmin = entry.RunAsAdmin;
         _javaMemoryText = entry.JavaMaxMemoryMb?.ToString() ?? string.Empty;
+        _launchUri = entry.LaunchUri ?? string.Empty;
     }
 
     public Guid Id => _original.Id;
@@ -85,6 +86,9 @@ public sealed partial class AppSettingsViewModel : ObservableValidator
     [ObservableProperty] private string _workingDirectory = string.Empty;
     [ObservableProperty] private string _arguments = string.Empty;
     [ObservableProperty] private bool _runAsAdmin;
+
+    /// <summary>Overrides the executable at launch (e.g. steam://rungameid/…).</summary>
+    [ObservableProperty] private string _launchUri = string.Empty;
 
     [ObservableProperty]
     [NotifyDataErrorInfo]
@@ -197,6 +201,7 @@ public sealed partial class AppSettingsViewModel : ObservableValidator
         e.Arguments = string.IsNullOrWhiteSpace(Arguments) ? null : Arguments.Trim();
         e.RunAsAdmin = RunAsAdmin;
         e.JavaMaxMemoryMb = int.TryParse(JavaMemoryText, out var mb) && mb > 0 ? mb : null;
+        e.LaunchUri = string.IsNullOrWhiteSpace(LaunchUri) ? null : LaunchUri.Trim();
         return e;
     }
 

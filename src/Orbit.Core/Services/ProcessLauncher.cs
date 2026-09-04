@@ -41,37 +41,44 @@ public sealed class ProcessLauncher : IProcessLauncher
     {
         var path = PathHelper.Normalize(entry.ExecutablePath);
         var exeName = path.Length > 0 ? Path.GetFileName(path) : entry.Name;
+        var uri = entry.LaunchUri?.Trim();
+        var viaUri = !string.IsNullOrEmpty(uri);
 
-        switch (_inspector.Evaluate(path))
+        // With a launch URI (e.g. steam://rungameid/…) the target is not our exe,
+        // so we don't gate on the exe existing – Steam owns the game files.
+        if (!viaUri)
         {
-            case AppAvailability.Missing:
-                _log.Warning("Launch aborted, file missing: {Path}", path);
-                return new LaunchOutcome(LaunchStatus.FileNotFound,
-                    $"Le fichier est introuvable :\n{path}");
-            case AppAvailability.Invalid:
-                _log.Warning("Launch aborted, not an executable: {Path}", path);
-                return new LaunchOutcome(LaunchStatus.NotAnExecutable,
-                    $"Ce fichier n'est pas un exécutable (.exe) :\n{path}");
+            switch (_inspector.Evaluate(path))
+            {
+                case AppAvailability.Missing:
+                    _log.Warning("Launch aborted, file missing: {Path}", path);
+                    return new LaunchOutcome(LaunchStatus.FileNotFound,
+                        $"Le fichier est introuvable :\n{path}");
+                case AppAvailability.Invalid:
+                    _log.Warning("Launch aborted, not an executable: {Path}", path);
+                    return new LaunchOutcome(LaunchStatus.NotAnExecutable,
+                        $"Ce fichier n'est pas un exécutable (.exe) :\n{path}");
+            }
         }
 
         var workingDirectory = FirstUsableDirectory(entry.WorkingDirectory, path);
 
         var psi = new ProcessStartInfo
         {
-            FileName = path,
-            Arguments = ComposeArguments(entry),
-            WorkingDirectory = workingDirectory ?? string.Empty,
+            FileName = viaUri ? uri! : path,
+            Arguments = viaUri ? string.Empty : ComposeArguments(entry),
+            WorkingDirectory = viaUri ? string.Empty : (workingDirectory ?? string.Empty),
             UseShellExecute = true
         };
 
-        if (entry.RunAsAdmin)
+        if (entry.RunAsAdmin && !viaUri)
             psi.Verb = "runas"; // ShellExecute elevation prompt
 
         try
         {
             var process = _starter(psi);
-            _log.Information("Launched {Exe} (pid {Pid})", exeName, SafePid(process));
-            return LaunchOutcome.Ok(exeName);
+            _log.Information("Launched {Target} (pid {Pid})", viaUri ? uri : exeName, SafePid(process));
+            return LaunchOutcome.Ok(entry.Name);
         }
         catch (Win32Exception ex)
         {
@@ -82,7 +89,13 @@ public sealed class ProcessLauncher : IProcessLauncher
                 ErrorCancelled => LaunchStatus.CancelledByUser,
                 _ => LaunchStatus.Failed
             };
-            _log.Error(ex, "Launch failed for {Exe} (win32 {Code})", exeName, ex.NativeErrorCode);
+            _log.Error(ex, "Launch failed for {Target} (win32 {Code})",
+                viaUri ? uri : exeName, ex.NativeErrorCode);
+
+            if (viaUri && uri!.StartsWith("steam:", StringComparison.OrdinalIgnoreCase))
+                return new LaunchOutcome(LaunchStatus.Failed,
+                    "Impossible de démarrer ce jeu via Steam. Steam est-il installé et connecté ?", ex);
+
             return new LaunchOutcome(status, DescribeWin32(status, exeName), ex);
         }
         catch (Exception ex) when (ex is InvalidOperationException or FileNotFoundException or IOException)
@@ -116,6 +129,28 @@ public sealed class ProcessLauncher : IProcessLauncher
         }
 
         return false;
+    }
+
+    public IReadOnlySet<string> GetRunningImageNames()
+    {
+        var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            foreach (var process in Process.GetProcesses())
+            {
+                using (process)
+                {
+                    if (!string.IsNullOrEmpty(process.ProcessName))
+                        names.Add(process.ProcessName);
+                }
+            }
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or Win32Exception)
+        {
+            // Best effort – an incomplete snapshot is fine for a UI hint.
+        }
+
+        return names;
     }
 
     internal static string ComposeArguments(AppEntry entry)

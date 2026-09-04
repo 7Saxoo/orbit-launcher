@@ -42,7 +42,12 @@ chemin, quelques métadonnées et une icône mise en cache.
 - **Détection automatique** des jeux et applications déjà installés : analyse de
   **Steam** (bibliothèques + manifestes), **Epic Games** (manifestes) et de la
   **liste des programmes installés de Windows** (registre). L'utilisateur coche
-  ce qu'il veut importer ; rien n'est ajouté sans son accord.
+  ce qu'il veut importer ; rien n'est ajouté sans son accord. Les jeux **Steam**
+  sont lancés via `steam://rungameid/<appid>` (DRM / overlay / cloud) — champ
+  *Cible de lancement* modifiable dans les paramètres de l'entrée.
+- **État « En cours »** : une carte indique si son programme tourne (au lieu du
+  nombre de lancements), rafraîchi toutes les 3 s ; grille de cartes
+  **responsive** (elles remplissent la largeur, sans espace mort à droite).
 - **Icône automatique** : extraction en grandes tailles (jusqu'à 256 px). Si
   l'exécutable n'a pas d'icône (`git.exe`, `mysqld.exe`…), Orbit essaie l'icône
   de l'installeur (registre `DisplayIcon`), puis un `.ico` ou un `.exe` voisin,
@@ -103,7 +108,7 @@ chemin, quelques métadonnées et une icône mise en cache.
 | Injection de dépendances | `Microsoft.Extensions.Hosting` / `DependencyInjection` | Composition centralisée. |
 | Journalisation | **Serilog** (`Sinks.File`, `Sinks.Debug`) | Fichiers rotatifs, format lisible. |
 | Zone de notification | **Hardcodet.NotifyIcon.Wpf** | Icône de tray + menu, sans dépendance WinForms. |
-| Tests | **xUnit** | 111 tests unitaires et d'intégration. |
+| Tests | **xUnit** | 114 tests unitaires et d'intégration. |
 
 ---
 
@@ -299,7 +304,7 @@ d'installation, qui peut être en lecture seule) :
 dotnet test
 ```
 
-**111 tests** (xUnit), notamment :
+**114 tests** (xUnit), notamment :
 
 - **`PathHelperTests`** — normalisation (guillemets, espaces, variables
   d'environnement, accents), comparaison de chemins insensible à la casse et au
@@ -326,7 +331,7 @@ dotnet test
   fichier → correction du chemin → lancement ; et réinitialisation qui n'altère
   jamais le `.exe` source.
 
-Résultat de la dernière exécution : **111 réussis, 0 échec**.
+Résultat de la dernière exécution : **114 réussis, 0 échec**.
 
 En complément, l'application a été **réellement démarrée** (build Release) :
 création de `orbit.db` + migration, écriture de `settings.json`, initialisation de

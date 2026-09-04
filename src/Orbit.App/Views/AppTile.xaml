@@ -6,8 +6,8 @@
              xmlns:vm="clr-namespace:Orbit.App.ViewModels"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance vm:AppTileViewModel}"
-             d:DesignWidth="264">
-    <Border x:Name="Root" Width="264" Margin="0,0,16,16" Padding="0"
+             d:DesignWidth="300">
+    <Border x:Name="Root" Margin="0,0,14,14" Padding="0" HorizontalAlignment="Stretch"
             ClipToBounds="True" RenderTransformOrigin="0.5,0.5">
         <Border.RenderTransform>
             <TranslateTransform Y="0" />
@@ -55,9 +55,9 @@
         <StackPanel>
 
             <!-- Banner -->
-            <Grid Height="112">
+            <Grid Height="150">
                 <Border Background="{DynamicResource Brush.Accent.Soft}" />
-                <Image Width="56" Height="56" VerticalAlignment="Center" HorizontalAlignment="Center"
+                <Image Width="86" Height="86" VerticalAlignment="Center" HorizontalAlignment="Center"
                        Source="{Binding IconPath, Converter={StaticResource IconToImage}}"
                        RenderOptions.BitmapScalingMode="HighQuality" />
 
@@ -120,6 +120,13 @@
                         Background="{DynamicResource Brush.Danger}" CornerRadius="5" Padding="6,2"
                         Visibility="{Binding IsMissing, Converter={StaticResource BoolToVisibility}}">
                     <TextBlock Text="Introuvable" FontSize="11"
+                               Foreground="{DynamicResource Brush.Text.OnAccent}" />
+                </Border>
+
+                <Border VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="8"
+                        Background="{DynamicResource Brush.Success}" CornerRadius="5" Padding="7,2"
+                        Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="● En cours" FontSize="11"
                                Foreground="{DynamicResource Brush.Text.OnAccent}" />
                 </Border>
             </Grid>

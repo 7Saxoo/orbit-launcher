@@ -137,11 +137,13 @@ public class SqliteAppRepositoryTests
         var entry = SampleEntry("Java Game");
         entry.RunAsAdmin = true;
         entry.JavaMaxMemoryMb = 4096;
+        entry.LaunchUri = "steam://rungameid/292030";
         await repo.AddAsync(entry);
 
         var loaded = await repo.GetByIdAsync(entry.Id);
         Assert.True(loaded!.RunAsAdmin);
         Assert.Equal(4096, loaded.JavaMaxMemoryMb);
+        Assert.Equal("steam://rungameid/292030", loaded.LaunchUri);
 
         loaded.RunAsAdmin = false;
         loaded.JavaMaxMemoryMb = null;

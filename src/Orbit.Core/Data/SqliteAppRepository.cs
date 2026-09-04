@@ -14,7 +14,7 @@ public sealed class SqliteAppRepository : IAppRepository
         "id, name, executable_path, arguments, working_directory, kind, category, description, " +
         "icon_cache_path, date_added, launch_count, last_launched_at, is_favorite, " +
         "genre, platform, publisher, cover_image_path, play_time_seconds, " +
-        "run_as_admin, java_max_memory_mb";
+        "run_as_admin, java_max_memory_mb, launch_uri";
 
     private readonly SqliteConnectionFactory _factory;
     private readonly ILogger _log;
@@ -72,7 +72,7 @@ public sealed class SqliteAppRepository : IAppRepository
             VALUES ($id, $name, $path, $args, $wd, $kind, $category, $description,
                     $icon, $added, $count, $last, $fav,
                     $genre, $platform, $publisher, $cover, $playtime,
-                    $admin, $javamem);
+                    $admin, $javamem, $launchuri);
             """;
         Bind(cmd, entry);
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
@@ -92,7 +92,7 @@ public sealed class SqliteAppRepository : IAppRepository
                 is_favorite = $fav, genre = $genre, platform = $platform,
                 publisher = $publisher, cover_image_path = $cover,
                 play_time_seconds = $playtime, run_as_admin = $admin,
-                java_max_memory_mb = $javamem
+                java_max_memory_mb = $javamem, launch_uri = $launchuri
             WHERE id = $id;
             """;
         Bind(cmd, entry);
@@ -160,6 +160,7 @@ public sealed class SqliteAppRepository : IAppRepository
         cmd.Parameters.AddWithValue("$playtime", (object?)e.PlayTimeSeconds ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$admin", e.RunAsAdmin ? 1 : 0);
         cmd.Parameters.AddWithValue("$javamem", (object?)e.JavaMaxMemoryMb ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$launchuri", (object?)e.LaunchUri ?? DBNull.Value);
     }
 
     private static AppEntry Map(SqliteDataReader r) => new()
@@ -183,7 +184,8 @@ public sealed class SqliteAppRepository : IAppRepository
         CoverImagePath = r.IsDBNull(16) ? null : r.GetString(16),
         PlayTimeSeconds = r.IsDBNull(17) ? null : r.GetInt64(17),
         RunAsAdmin = !r.IsDBNull(18) && r.GetInt32(18) != 0,
-        JavaMaxMemoryMb = r.IsDBNull(19) ? null : r.GetInt32(19)
+        JavaMaxMemoryMb = r.IsDBNull(19) ? null : r.GetInt32(19),
+        LaunchUri = r.IsDBNull(20) ? null : r.GetString(20)
     };
 
     private static DateTimeOffset? ParseDate(string value) =>

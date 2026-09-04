@@ -29,6 +29,7 @@
             <conv:EnumEqualsConverter x:Key="EnumEquals" />
             <conv:RelativeDateConverter x:Key="RelativeDate" />
             <conv:CountToVisibilityConverter x:Key="CountToVisibility" />
+            <conv:WidthToColumnsConverter x:Key="WidthToColumns" />
 
             <DataTemplate DataType="{x:Type vm:HomeViewModel}">
                 <views:HomeView />

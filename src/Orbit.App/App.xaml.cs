@@ -124,6 +124,7 @@ public partial class App : Application
                 services.AddSingleton<TrayIconService>();
                 services.AddSingleton<IDialogService, DialogService>();
                 services.AddSingleton<AppTileContext>();
+                services.AddTransient<RunningStateTicker>();
                 services.AddSingleton<AddAppFlow>();
 
                 services.AddTransient<DetectionViewModel>();

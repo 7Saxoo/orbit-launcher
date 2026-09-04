@@ -159,6 +159,27 @@ public sealed class RelativeDateConverter : IValueConverter
         Binding.DoNothing;
 }
 
+/// <summary>
+/// Available width -> a column count for a UniformGrid, so cards flow edge to
+/// edge with no gap before the scrollbar. ConverterParameter is the target card
+/// width in DIPs (default 300).
+/// </summary>
+public sealed class WidthToColumnsConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var width = value is double d && !double.IsNaN(d) ? d : 0;
+        var target = 300.0;
+        if (parameter is string s && double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var t) && t > 0)
+            target = t;
+
+        return Math.Max(1, (int)Math.Floor(width / target));
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        Binding.DoNothing;
+}
+
 /// <summary>Count &gt; 0 -> Collapsed (used to toggle empty-state panels).</summary>
 public sealed class CountToVisibilityConverter : IValueConverter
 {

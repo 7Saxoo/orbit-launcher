@@ -63,7 +63,9 @@ public sealed class SteamSource : IInstalledAppSource
                     Kind = AppKind.Game,
                     Category = "Steam",
                     Source = "Steam",
-                    InstallLocation = installFolder
+                    InstallLocation = installFolder,
+                    // Launch through Steam so DRM / overlay / cloud saves work.
+                    LaunchUri = $"steam://rungameid/{game.AppId}"
                 };
             }
         }

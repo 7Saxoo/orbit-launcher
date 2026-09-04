@@ -18,13 +18,13 @@ public class DatabaseTests
         using var connection = factory.Create();
         using var cmd = connection.CreateCommand();
         cmd.CommandText = "PRAGMA user_version;";
-        Assert.Equal(2, Convert.ToInt32(cmd.ExecuteScalar()));
+        Assert.Equal(3, Convert.ToInt32(cmd.ExecuteScalar()));
 
         cmd.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='app_entries';";
         Assert.Equal(1L, (long)cmd.ExecuteScalar()!);
 
-        // v2 columns present
-        cmd.CommandText = "SELECT run_as_admin, java_max_memory_mb FROM app_entries LIMIT 0;";
+        // v2 + v3 columns present
+        cmd.CommandText = "SELECT run_as_admin, java_max_memory_mb, launch_uri FROM app_entries LIMIT 0;";
         cmd.ExecuteReader().Dispose();
     }
 

@@ -22,4 +22,7 @@ public sealed record DetectedApp
 
     /// <summary>Extra icon source (e.g. an installer's <c>DisplayIcon</c>), tried before the exe.</summary>
     public string? IconSource { get; init; }
+
+    /// <summary>Preferred launch target (e.g. <c>steam://rungameid/&lt;appid&gt;</c>).</summary>
+    public string? LaunchUri { get; init; }
 }

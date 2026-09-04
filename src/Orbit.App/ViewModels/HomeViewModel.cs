@@ -18,19 +18,23 @@ public sealed partial class HomeViewModel : ObservableObject
     private readonly AppTileContext _tileContext;
     private readonly AddAppFlow _addAppFlow;
     private readonly DetectionFlow _detectionFlow;
+    private readonly Orbit.App.Infrastructure.RunningStateTicker _runningTicker;
     private readonly ILogger _log;
+    private bool _trackingRunning;
 
     public HomeViewModel(
         ILibraryService library,
         AppTileContext tileContext,
         AddAppFlow addAppFlow,
         DetectionFlow detectionFlow,
+        Orbit.App.Infrastructure.RunningStateTicker runningTicker,
         ILogger log)
     {
         _library = library;
         _tileContext = tileContext;
         _addAppFlow = addAppFlow;
         _detectionFlow = detectionFlow;
+        _runningTicker = runningTicker;
         _log = log.ForContext<HomeViewModel>();
     }
 
@@ -72,6 +76,12 @@ public sealed partial class HomeViewModel : ObservableObject
                 .Take(RailSize));
 
             HasLoadedOnce = true;
+
+            if (!_trackingRunning)
+            {
+                _trackingRunning = true;
+                _runningTicker.Track(() => RecentlyAdded.Concat(MostLaunched));
+            }
         }
         catch (Exception ex)
         {

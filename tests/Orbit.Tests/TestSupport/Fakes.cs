@@ -150,4 +150,8 @@ public sealed class FakeProcessLauncher : IProcessLauncher
     }
 
     public bool IsRunning(AppEntry entry) => Running;
+
+    public HashSet<string> RunningImageNames { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public IReadOnlySet<string> GetRunningImageNames() => RunningImageNames;
 }

@@ -99,12 +99,12 @@
 
         <!-- Content -->
         <Grid Grid.Row="2">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                          Padding="0,0,4,0">
-                <ItemsControl ItemsSource="{Binding ItemsView}">
+            <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding ItemsView}" Margin="0,0,-14,0">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal" />
+                            <UniformGrid Columns="{Binding ViewportWidth, ElementName=Scroller, Converter={StaticResource WidthToColumns}, ConverterParameter=285}" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>

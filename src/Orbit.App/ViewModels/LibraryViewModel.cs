@@ -23,20 +23,24 @@ public sealed partial class LibraryViewModel : ObservableObject
     private readonly AppTileContext _tileContext;
     private readonly AddAppFlow _addAppFlow;
     private readonly DetectionFlow _detectionFlow;
+    private readonly Orbit.App.Infrastructure.RunningStateTicker _runningTicker;
     private readonly ILogger _log;
     private readonly ListCollectionView _view;
+    private bool _trackingRunning;
 
     public LibraryViewModel(
         ILibraryService library,
         AppTileContext tileContext,
         AddAppFlow addAppFlow,
         DetectionFlow detectionFlow,
+        Orbit.App.Infrastructure.RunningStateTicker runningTicker,
         ILogger log)
     {
         _library = library;
         _tileContext = tileContext;
         _addAppFlow = addAppFlow;
         _detectionFlow = detectionFlow;
+        _runningTicker = runningTicker;
         _log = log.ForContext<LibraryViewModel>();
 
         _selectedSort = SortOptions[0];
@@ -125,6 +129,13 @@ public sealed partial class LibraryViewModel : ObservableObject
 
             RebuildCategories();
             HasLoadedOnce = true;
+
+            if (!_trackingRunning)
+            {
+                _trackingRunning = true;
+                _runningTicker.Track(() => Items);
+            }
+
             _log.Debug("Library view refreshed: {Count} entries", Items.Count);
         }
         catch (Exception ex)

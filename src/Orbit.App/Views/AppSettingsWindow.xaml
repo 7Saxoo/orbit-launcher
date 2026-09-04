@@ -111,6 +111,12 @@
                         <TextBox Style="{StaticResource TextBox.Base}"
                                  Text="{Binding Arguments, UpdateSourceTrigger=PropertyChanged}" />
 
+                        <TextBlock Text="Cible de lancement (optionnel)" Style="{StaticResource Lbl}" />
+                        <TextBox Style="{StaticResource TextBox.Base}"
+                                 Text="{Binding LaunchUri, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Style="{StaticResource Text.Caption}" Margin="0,3,0,0" TextWrapping="Wrap"
+                                   Text="Remplace l'exécutable au lancement. Ex. jeu Steam : steam://rungameid/&lt;appid&gt;. Rempli automatiquement pour les jeux Steam détectés." />
+
                         <TextBlock Text="Mémoire max Java — Mo (Minecraft &amp; jeux Java, optionnel)"
                                    Style="{StaticResource Lbl}" />
                         <TextBox Style="{StaticResource TextBox.Base}" MaxWidth="160" HorizontalAlignment="Left"

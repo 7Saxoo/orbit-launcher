@@ -1,3 +1,4 @@
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Orbit.Core.Models;
@@ -29,22 +30,39 @@ public sealed partial class AppTileViewModel : ObservableObject
     public string KindLabel => Entry.Kind == AppKind.Game ? "Jeu" : "Application";
     public string CategoryLabel => string.IsNullOrWhiteSpace(Entry.Category) ? "Sans catégorie" : Entry.Category;
 
-    public string PrimaryActionLabel => Availability == AppAvailability.Missing
-        ? "Fichier introuvable"
-        : Entry.Kind == AppKind.Game ? "▶  Jouer" : "▶  Ouvrir";
+    private bool CanLaunchDespiteMissing => !string.IsNullOrWhiteSpace(Entry.LaunchUri);
 
-    public string SubtitleLabel
-    {
-        get
-        {
-            var plays = Entry.LaunchCount == 0 ? null : $"{Entry.LaunchCount} lancement{(Entry.LaunchCount > 1 ? "s" : "")}";
-            return plays is null ? KindLabel : $"{KindLabel} · {plays}";
-        }
-    }
+    public string PrimaryActionLabel =>
+        Availability == AppAvailability.Missing && !CanLaunchDespiteMissing ? "Fichier introuvable" :
+        IsRunning ? "▶  Relancer" :
+        Entry.Kind == AppKind.Game ? "▶  Jouer" : "▶  Ouvrir";
+
+    /// <summary>"Jeu · En cours" while the process is up, otherwise just the kind.</summary>
+    public string SubtitleLabel => IsRunning ? $"{KindLabel}  ·  En cours" : KindLabel;
 
     [ObservableProperty] private AppAvailability _availability;
     [ObservableProperty] private bool _isFavorite;
     [ObservableProperty] private bool _isBusy;
+    [ObservableProperty] private bool _isRunning;
+
+    partial void OnIsRunningChanged(bool value)
+    {
+        OnPropertyChanged(nameof(SubtitleLabel));
+        OnPropertyChanged(nameof(PrimaryActionLabel));
+    }
+
+    /// <summary>Called by the owning view-model on a timer with one process snapshot.</summary>
+    public void UpdateRunningState(IReadOnlySet<string> runningImageNames)
+    {
+        var path = Entry.ExecutablePath;
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            IsRunning = false;
+            return;
+        }
+
+        IsRunning = runningImageNames.Contains(Path.GetFileNameWithoutExtension(path));
+    }
 
     /// <summary>Set by the library VM when bulk-selection mode is active.</summary>
     [ObservableProperty] private bool _selectionMode;
@@ -55,7 +73,7 @@ public sealed partial class AppTileViewModel : ObservableObject
     [RelayCommand]
     private void ToggleSelected() => IsSelected = !IsSelected;
 
-    public bool IsMissing => Availability != AppAvailability.Available;
+    public bool IsMissing => Availability != AppAvailability.Available && !CanLaunchDespiteMissing;
 
     partial void OnAvailabilityChanged(AppAvailability value)
     {
@@ -66,7 +84,7 @@ public sealed partial class AppTileViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanInteract))]
     private async Task LaunchAsync()
     {
-        if (Availability == AppAvailability.Missing)
+        if (Availability == AppAvailability.Missing && !CanLaunchDespiteMissing)
         {
             OpenSettings();
             return;
