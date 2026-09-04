@@ -1,17 +1,16 @@
 namespace Orbit.Core.Services;
 
+/// <summary>The single palette choice. "System" follows Windows (light/dark);
+/// the rest are explicit grounds + accent colours.</summary>
 public enum ThemePreference
 {
     System = 0,
     Light = 1,
-    Dark = 2
-}
-
-/// <summary>Accent colour family: cool blues/violets or warm ambers/terracotta.</summary>
-public enum AccentTemperature
-{
-    Cool = 0,
-    Warm = 1
+    Dark = 2,
+    Blue = 3,
+    Amber = 4,
+    Violet = 5,
+    Green = 6
 }
 
 public enum LibrarySort
@@ -26,8 +25,6 @@ public enum LibrarySort
 public sealed class AppSettings
 {
     public ThemePreference Theme { get; set; } = ThemePreference.Dark;
-
-    public AccentTemperature Temperature { get; set; } = AccentTemperature.Cool;
 
     public LibrarySort Sort { get; set; } = LibrarySort.Name;
 

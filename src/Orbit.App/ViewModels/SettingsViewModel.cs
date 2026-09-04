@@ -9,11 +9,8 @@ using Serilog;
 
 namespace Orbit.App.ViewModels;
 
-/// <summary>A theme choice plus the colours used to preview it in the dropdown.</summary>
-public sealed record ThemeOption(ThemePreference Value, string Label, string Bg, string Fg, string Accent);
-
-/// <summary>An accent-temperature choice plus its preview colours.</summary>
-public sealed record TemperatureOption(AccentTemperature Value, string Label, string Bg, string Fg, string Accent);
+/// <summary>A palette choice plus the accent colour shown as a dot in the dropdown.</summary>
+public sealed record ThemeOption(ThemePreference Value, string Label, string Dot);
 public sealed record WindowSizeOption(int Width, int Height, bool Maximized, string Label);
 public sealed record UiScaleOption(double Scale, string Label);
 
@@ -51,7 +48,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         _log = log.ForContext<SettingsViewModel>();
 
         _selectedTheme = ThemeOptions[0];
-        _selectedTemperature = TemperatureOptions[0];
         _selectedSort = SortOptions[0];
         _selectedWindowSize = WindowSizeOptions[0];
         _selectedUiScale = UiScaleOptions[1];
@@ -63,15 +59,13 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     public IReadOnlyList<ThemeOption> ThemeOptions { get; } = new[]
     {
-        new ThemeOption(ThemePreference.System, "Système", "#26304A", "#E9EFFA", "#7B8CB0"),
-        new ThemeOption(ThemePreference.Light,  "Clair",   "#F4F7FC", "#1A2233", "#2F6FED"),
-        new ThemeOption(ThemePreference.Dark,   "Sombre",  "#0F1524", "#E9EFFA", "#4C7DF0"),
-    };
-
-    public IReadOnlyList<TemperatureOption> TemperatureOptions { get; } = new[]
-    {
-        new TemperatureOption(AccentTemperature.Cool, "Froide (bleu)",  "#1B2A4A", "#DCE6FA", "#4C7DF0"),
-        new TemperatureOption(AccentTemperature.Warm, "Chaude (ambre)", "#3A2A1C", "#F5E7D6", "#F0975A"),
+        new ThemeOption(ThemePreference.System, "Système",       "#8A93A8"),
+        new ThemeOption(ThemePreference.Light,  "Clair (blanc)", "#2F6FED"),
+        new ThemeOption(ThemePreference.Dark,   "Sombre (noir)", "#3B82F6"),
+        new ThemeOption(ThemePreference.Blue,   "Bleu",          "#4C7DF0"),
+        new ThemeOption(ThemePreference.Amber,  "Ambre",         "#F0975A"),
+        new ThemeOption(ThemePreference.Violet, "Violet",        "#8B5CF6"),
+        new ThemeOption(ThemePreference.Green,  "Vert",          "#3FB170"),
     };
 
     public IReadOnlyList<SortOption> SortOptions { get; } = new[]
@@ -100,7 +94,6 @@ public sealed partial class SettingsViewModel : ObservableObject
     };
 
     [ObservableProperty] private ThemeOption _selectedTheme;
-    [ObservableProperty] private TemperatureOption _selectedTemperature;
     [ObservableProperty] private SortOption _selectedSort;
     [ObservableProperty] private WindowSizeOption _selectedWindowSize;
     [ObservableProperty] private UiScaleOption _selectedUiScale;
@@ -212,13 +205,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     partial void OnSelectedThemeChanged(ThemeOption value)
     {
-        _themeManager.Apply(value.Value, SelectedTemperature.Value);
-        Persist();
-    }
-
-    partial void OnSelectedTemperatureChanged(TemperatureOption value)
-    {
-        _themeManager.Apply(SelectedTheme.Value, value.Value);
+        _themeManager.Apply(value.Value);
         Persist();
     }
 
@@ -257,7 +244,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         {
             var c = _settings.Current;
             SelectedTheme = ThemeOptions.FirstOrDefault(o => o.Value == c.Theme) ?? ThemeOptions[0];
-            SelectedTemperature = TemperatureOptions.FirstOrDefault(o => o.Value == c.Temperature) ?? TemperatureOptions[0];
             SelectedSort = SortOptions.FirstOrDefault(o => o.Value == c.Sort) ?? SortOptions[0];
             ConfirmBeforeRemove = c.ConfirmBeforeRemove;
             MinimizeToTrayOnClose = c.MinimizeToTrayOnClose;
@@ -286,7 +272,6 @@ public sealed partial class SettingsViewModel : ObservableObject
 
         var updated = _settings.Current.Clone();
         updated.Theme = SelectedTheme.Value;
-        updated.Temperature = SelectedTemperature.Value;
         updated.Sort = SelectedSort.Value;
         updated.ConfirmBeforeRemove = ConfirmBeforeRemove;
         updated.MinimizeToTrayOnClose = MinimizeToTrayOnClose;

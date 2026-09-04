@@ -10,7 +10,7 @@
     <RootNamespace>Orbit.App</RootNamespace>
     <AssemblyName>Orbit</AssemblyName>
     <ApplicationIcon>Assets\orbit.ico</ApplicationIcon>
-    <Version>1.7.1</Version>
+    <Version>1.8.0</Version>
     <Product>Orbit</Product>
     <Company>Orbit</Company>
     <Description>Centralisateur d'applications et de jeux Windows</Description>

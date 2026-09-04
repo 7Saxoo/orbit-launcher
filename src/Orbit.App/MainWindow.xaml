@@ -46,10 +46,24 @@
             <DockPanel LastChildFill="True">
 
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="18,18,18,14">
-                    <Image Source="pack://application:,,,/Orbit;component/Assets/orbit-mark.png"
-                           Width="28" Height="28" VerticalAlignment="Center" />
-                    <TextBlock Text="ORBIT" FontSize="16" FontWeight="Bold" Margin="10,0,0,0"
-                               VerticalAlignment="Center" />
+                    <Grid Width="30" Height="30" VerticalAlignment="Center">
+                        <Ellipse Width="29" Height="13" StrokeThickness="3"
+                                 Stroke="{DynamicResource Brush.Text.Secondary}"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                                 RenderTransformOrigin="0.5,0.5">
+                            <Ellipse.RenderTransform>
+                                <RotateTransform Angle="-24" />
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+                        <Ellipse Width="19" Height="19" Fill="{DynamicResource Brush.Accent}"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Ellipse Width="6" Height="6" Fill="{DynamicResource Brush.Text.OnAccent}"
+                                 Opacity="0.75" Margin="0,4,7,0"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+                    <TextBlock Text="ORBIT" FontSize="16" FontWeight="Bold" Margin="11,0,0,0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource Brush.Text.Primary}" />
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom" Margin="6,8,6,10">
@@ -202,7 +216,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Style="{StaticResource Text.Caption}"
-                               Text="Orbit v1.7.1 · developed by Saxo" />
+                               Text="Orbit v1.8.0 · developed by Saxo" />
                     <TextBlock Grid.Column="1" Style="{StaticResource Text.Caption}" Margin="16,0,0,0"
                                Text="{Binding StatusMessage}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Column="2" Style="{StaticResource Text.Caption}"

@@ -16,7 +16,6 @@ public class JsonSettingsServiceTests
 
         Assert.True(File.Exists(ws.Paths.SettingsFile));
         Assert.Equal(ThemePreference.Dark, service.Current.Theme);
-        Assert.Equal(AccentTemperature.Cool, service.Current.Temperature);
         Assert.True(service.Current.ConfirmBeforeRemove);
         Assert.True(service.Current.MinimizeToTrayOnClose);
         Assert.Equal(0.85, service.Current.UiScale);
@@ -34,8 +33,7 @@ public class JsonSettingsServiceTests
 
         await service.SaveAsync(new AppSettings
         {
-            Theme = ThemePreference.Light,
-            Temperature = AccentTemperature.Warm,
+            Theme = ThemePreference.Violet,
             Sort = LibrarySort.MostLaunched,
             ConfirmBeforeRemove = false,
             LastSection = "Games",
@@ -49,8 +47,7 @@ public class JsonSettingsServiceTests
         var reloaded = new JsonSettingsService(ws.Paths, Logger.None);
         reloaded.Load();
 
-        Assert.Equal(ThemePreference.Light, reloaded.Current.Theme);
-        Assert.Equal(AccentTemperature.Warm, reloaded.Current.Temperature);
+        Assert.Equal(ThemePreference.Violet, reloaded.Current.Theme);
         Assert.Equal(LibrarySort.MostLaunched, reloaded.Current.Sort);
         Assert.False(reloaded.Current.ConfirmBeforeRemove);
         Assert.Equal("Games", reloaded.Current.LastSection);

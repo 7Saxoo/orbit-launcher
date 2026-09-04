@@ -6,34 +6,23 @@ using Orbit.Core.Services;
 namespace Orbit.App.Infrastructure;
 
 /// <summary>
-/// Applies one of four palettes (light/dark × cool/warm) as merged-dictionary
-/// slot 0 in <c>App.xaml</c>. Control styles reference its brushes with
-/// <c>DynamicResource</c>, so a swap updates the live UI.
+/// Applies one palette dictionary as merged-dictionary slot 0 in <c>App.xaml</c>.
+/// Control styles reference its brushes with <c>DynamicResource</c>, so a swap
+/// updates the live UI. "System" resolves to Light or Dark from the OS.
 /// </summary>
 public sealed class ThemeManager
 {
-    private static readonly IReadOnlyDictionary<(bool Dark, bool Warm), string> Palettes =
-        new Dictionary<(bool, bool), string>
-        {
-            [(false, false)] = "/Orbit;component/Resources/Themes/Theme.LightCool.xaml",
-            [(false, true)]  = "/Orbit;component/Resources/Themes/Theme.LightWarm.xaml",
-            [(true, false)]  = "/Orbit;component/Resources/Themes/Theme.DarkCool.xaml",
-            [(true, true)]   = "/Orbit;component/Resources/Themes/Theme.DarkWarm.xaml",
-        };
+    private const string Prefix = "/Orbit;component/Resources/Themes/Theme.";
 
-    public void Apply(ThemePreference theme, AccentTemperature temperature)
+    public void Apply(ThemePreference theme)
     {
-        var dark = theme switch
-        {
-            ThemePreference.Light => false,
-            ThemePreference.Dark => true,
-            _ => IsSystemUsingDarkMode()
-        };
-        var warm = temperature == AccentTemperature.Warm;
+        var resolved = theme == ThemePreference.System
+            ? (IsSystemUsingDarkMode() ? ThemePreference.Dark : ThemePreference.Light)
+            : theme;
 
         var dict = new ResourceDictionary
         {
-            Source = new Uri(Palettes[(dark, warm)], UriKind.Relative)
+            Source = new Uri($"{Prefix}{resolved}.xaml", UriKind.Relative)
         };
 
         var merged = Application.Current.Resources.MergedDictionaries;
@@ -55,7 +44,7 @@ public sealed class ThemeManager
         }
         catch (Exception ex) when (ex is System.Security.SecurityException or IOException or UnauthorizedAccessException)
         {
-            return false;
+            return true;
         }
     }
 }

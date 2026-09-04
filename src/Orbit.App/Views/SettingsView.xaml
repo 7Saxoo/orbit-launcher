@@ -12,16 +12,12 @@
             <TextBlock Text="{Binding Label}" />
         </DataTemplate>
 
-        <!-- Coloured preview: a chip filled with the option's own background,
-             its label in the option's own text colour, and an accent dot. -->
-        <DataTemplate x:Key="ColourSwatch">
-            <Border CornerRadius="5" Padding="10,6" Margin="-2,0" Background="{Binding Bg}">
-                <StackPanel Orientation="Horizontal">
-                    <Border Width="11" Height="11" CornerRadius="6" Margin="0,0,9,0"
-                            Background="{Binding Accent}" />
-                    <TextBlock Text="{Binding Label}" Foreground="{Binding Fg}" />
-                </StackPanel>
-            </Border>
+        <!-- A coloured accent dot next to the label — no background fill. -->
+        <DataTemplate x:Key="ThemeDot">
+            <StackPanel Orientation="Horizontal">
+                <Ellipse Width="11" Height="11" Margin="0,0,9,0" Fill="{Binding Dot}" />
+                <TextBlock Text="{Binding Label}" VerticalAlignment="Center" />
+            </StackPanel>
         </DataTemplate>
     </UserControl.Resources>
 
@@ -41,25 +37,12 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
                             <TextBlock Text="Thème" />
-                            <TextBlock Text="Clair, sombre ou selon Windows" Style="{StaticResource Text.Caption}" />
+                            <TextBlock Text="Système, clair, sombre ou une couleur d'accent"
+                                       Style="{StaticResource Text.Caption}" />
                         </StackPanel>
                         <ComboBox Grid.Column="1" Width="200" Style="{StaticResource ComboBox.Base}"
                                   ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding SelectedTheme}"
-                                  ItemTemplate="{StaticResource ColourSwatch}" />
-                    </Grid>
-
-                    <Grid Margin="0,14,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="Température des couleurs" />
-                            <TextBlock Text="Palette froide (bleu) ou chaude (ambre)" Style="{StaticResource Text.Caption}" />
-                        </StackPanel>
-                        <ComboBox Grid.Column="1" Width="200" Style="{StaticResource ComboBox.Base}"
-                                  ItemsSource="{Binding TemperatureOptions}" SelectedItem="{Binding SelectedTemperature}"
-                                  ItemTemplate="{StaticResource ColourSwatch}" />
+                                  ItemTemplate="{StaticResource ThemeDot}" />
                     </Grid>
 
                     <Grid Margin="0,14,0,0">

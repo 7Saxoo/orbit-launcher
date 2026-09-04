@@ -8,7 +8,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <!-- Slot 0 is replaced at runtime by ThemeManager (light/dark × cool/warm). -->
-                <ResourceDictionary Source="Resources/Themes/Theme.DarkCool.xaml" />
+                <ResourceDictionary Source="Resources/Themes/Theme.Dark.xaml" />
                 <ResourceDictionary Source="Resources/Controls.xaml" />
             </ResourceDictionary.MergedDictionaries>
 

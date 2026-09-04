@@ -73,11 +73,13 @@ chemin, quelques métadonnées et une icône mise en cache.
   les options de lancement (arguments, dossier de travail, **lancer en
   administrateur**, **mémoire max Java `-Xmx/-Xms`**), ouvrir l'emplacement,
   lancer, ou supprimer de la bibliothèque.
-- **Thème** clair / sombre / système + **température des couleurs** au choix :
-  **froide** (bleu) ou **chaude** (ambre), appliqué à chaud. Police **Poppins**
-  embarquée. Interface épurée façon tableau de bord ; **barre de titre, barres
-  de défilement, menus, info-bulles et boîtes de dialogue** suivent la palette
-  (plus de `MessageBox` Windows) ; transitions de section animées.
+- **Thème** : liste unique — **Système** (suit Windows), **Clair**, **Sombre**,
+  **Bleu**, **Ambre**, **Violet**, **Vert** — chaque entrée = fond + couleur
+  d'accent, appliqué à chaud. Le **logo** (planète vectorielle + « ORBIT ») se
+  recolore selon le thème. Police **Poppins** embarquée. Interface épurée façon
+  tableau de bord ; **barre de titre, barres de défilement, menus, info-bulles
+  et boîtes de dialogue** suivent la palette (plus de `MessageBox` Windows) ;
+  transitions de section animées.
 - **Fenêtre** : « adaptée à l'écran » au premier lancement, puis taille réglable
   depuis les paramètres (1280×720, 1600×900, **1920×1080**, maximisée) et
   mémorisée. **Taille de l'interface** réglable (Très compacte / Compacte /

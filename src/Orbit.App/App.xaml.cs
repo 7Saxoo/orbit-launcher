@@ -58,7 +58,7 @@ public partial class App : Application
             settings.Load();
             UiScaleManager.Set(settings.Current.UiScale);
             _host.Services.GetRequiredService<ThemeManager>()
-                .Apply(settings.Current.Theme, settings.Current.Temperature);
+                .Apply(settings.Current.Theme);
 
             var main = _host.Services.GetRequiredService<MainViewModel>();
             var window = _host.Services.GetRequiredService<MainWindow>();
