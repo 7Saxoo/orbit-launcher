@@ -12,6 +12,13 @@ public partial class MainWindow : Window, IWindowService
 {
     private readonly ISettingsService _settings;
 
+    /// <summary>
+    /// True while the window follows "Adaptée à l'écran": it fills the work area
+    /// on every launch and its exact size is never persisted (so it keeps
+    /// re-fitting even after a manual resize during the session).
+    /// </summary>
+    private bool _autoFit;
+
     public MainWindow(ISettingsService settings)
     {
         _settings = settings;
@@ -20,14 +27,22 @@ public partial class MainWindow : Window, IWindowService
         UiScaleManager.Track(this);
 
         var s = settings.Current;
-        if (s.WindowWidth <= 0 || s.WindowHeight <= 0)
-            FitToScreen();
-        else if (s.WindowMaximized)
+        if (s.WindowMaximized)
+        {
+            _autoFit = false;
             WindowState = WindowState.Maximized;
+        }
+        else if (s.WindowWidth <= 0 || s.WindowHeight <= 0)
+        {
+            _autoFit = true;
+            FillWorkArea();
+        }
         else
         {
+            _autoFit = false;
             Width = Math.Max(MinWidth, s.WindowWidth);
             Height = Math.Max(MinHeight, s.WindowHeight);
+            RecentreOnScreen();
         }
 
         Application.Current.Exit += (_, _) => PersistSize();
@@ -37,36 +52,42 @@ public partial class MainWindow : Window, IWindowService
     {
         if (maximized)
         {
+            _autoFit = false;
             WindowState = WindowState.Maximized;
         }
         else if (width <= 0 || height <= 0)
         {
+            _autoFit = true;
             WindowState = WindowState.Normal;
-            FitToScreen();
+            FillWorkArea();
         }
         else
         {
+            _autoFit = false;
             WindowState = WindowState.Normal;
             Width = width;
             Height = height;
             RecentreOnScreen();
         }
+
+        PersistSize();
     }
 
-    /// <summary>Sizes the window to ~92% of the current screen's work area and centres it.</summary>
-    private void FitToScreen()
+    /// <summary>Sizes the window to the current screen's usable area (minus the taskbar).</summary>
+    private void FillWorkArea()
     {
         var area = SystemParameters.WorkArea;
-        Width = Math.Max(MinWidth, area.Width * 0.92);
-        Height = Math.Max(MinHeight, area.Height * 0.92);
-        RecentreOnScreen();
+        Left = area.Left;
+        Top = area.Top;
+        Width = Math.Max(MinWidth, area.Width);
+        Height = Math.Max(MinHeight, area.Height);
     }
 
     private void RecentreOnScreen()
     {
         var area = SystemParameters.WorkArea;
-        Left = area.Left + (area.Width - Width) / 2;
-        Top = area.Top + (area.Height - Height) / 2;
+        Left = area.Left + Math.Max(0, (area.Width - Width) / 2);
+        Top = area.Top + Math.Max(0, (area.Height - Height) / 2);
     }
 
     private void PersistSize()
@@ -74,12 +95,24 @@ public partial class MainWindow : Window, IWindowService
         try
         {
             var s = _settings.Current.Clone();
-            s.WindowMaximized = WindowState == WindowState.Maximized;
-            if (WindowState == WindowState.Normal)
+
+            if (_autoFit)
             {
-                s.WindowWidth = (int)ActualWidth;
-                s.WindowHeight = (int)ActualHeight;
+                // Keep the "fit to screen" sentinel so it re-fits next launch.
+                s.WindowWidth = 0;
+                s.WindowHeight = 0;
+                s.WindowMaximized = false;
             }
+            else
+            {
+                s.WindowMaximized = WindowState == WindowState.Maximized;
+                if (WindowState == WindowState.Normal)
+                {
+                    s.WindowWidth = (int)ActualWidth;
+                    s.WindowHeight = (int)ActualHeight;
+                }
+            }
+
             _ = _settings.SaveAsync(s);
         }
         catch

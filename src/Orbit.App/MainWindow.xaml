@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="Orbit — Centralisateur d'applications et de jeux"
         Height="780" Width="1280" MinHeight="560" MinWidth="940"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="Manual"
         Background="{DynamicResource Brush.Window.Background}"
         TextOptions.TextFormattingMode="Ideal"
         d:DataContext="{d:DesignInstance vm:MainViewModel}">
@@ -202,7 +202,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Style="{StaticResource Text.Caption}"
-                               Text="Orbit v1.7.0 · developed by Saxo" />
+                               Text="Orbit v1.7.1 · developed by Saxo" />
                     <TextBlock Grid.Column="1" Style="{StaticResource Text.Caption}" Margin="16,0,0,0"
                                Text="{Binding StatusMessage}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Column="2" Style="{StaticResource Text.Caption}"
