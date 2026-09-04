@@ -155,3 +155,15 @@ public sealed class FakeProcessLauncher : IProcessLauncher
 
     public IReadOnlySet<string> GetRunningImageNames() => RunningImageNames;
 }
+
+/// <summary>No-op Steam helper with scriptable appid resolution.</summary>
+public sealed class FakeSteamHelper : ISteamHelper
+{
+    public string? AppIdToResolve { get; set; }
+    public bool IsSteamPath { get; set; }
+    public int EnsureRunningCalls { get; private set; }
+
+    public bool IsSteamGamePath(string executablePath) => IsSteamPath;
+    public string? ResolveAppId(string executablePath) => AppIdToResolve;
+    public void EnsureRunningMinimised() => EnsureRunningCalls++;
+}

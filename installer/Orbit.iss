@@ -3,7 +3,7 @@
 ; (or run installer\build-installer.ps1 which publishes first)
 
 #define AppName "Orbit"
-#define AppVersion "1.8.0"
+#define AppVersion "1.8.1"
 #define AppPublisher "Saxo"
 #define AppExe "Orbit.exe"
 

@@ -21,18 +21,21 @@ public sealed class ProcessLauncher : IProcessLauncher
     private const int ErrorCancelled = 1223; // UAC prompt dismissed
 
     private readonly IExecutableInspector _inspector;
+    private readonly ISteamHelper _steam;
     private readonly ILogger _log;
     private readonly Func<ProcessStartInfo, Process?> _starter;
 
-    public ProcessLauncher(IExecutableInspector inspector, ILogger log)
-        : this(inspector, log, static psi => Process.Start(psi))
+    public ProcessLauncher(IExecutableInspector inspector, ISteamHelper steam, ILogger log)
+        : this(inspector, steam, log, static psi => Process.Start(psi))
     {
     }
 
     // Test seam: lets unit tests simulate the OS without starting real processes.
-    internal ProcessLauncher(IExecutableInspector inspector, ILogger log, Func<ProcessStartInfo, Process?> starter)
+    internal ProcessLauncher(
+        IExecutableInspector inspector, ISteamHelper steam, ILogger log, Func<ProcessStartInfo, Process?> starter)
     {
         _inspector = inspector;
+        _steam = steam;
         _log = log.ForContext<ProcessLauncher>();
         _starter = starter;
     }
@@ -41,8 +44,19 @@ public sealed class ProcessLauncher : IProcessLauncher
     {
         var path = PathHelper.Normalize(entry.ExecutablePath);
         var exeName = path.Length > 0 ? Path.GetFileName(path) : entry.Name;
+
         var uri = entry.LaunchUri?.Trim();
+        // Fall back to steam://rungameid for Steam games without a stored URI
+        // (e.g. added before v1.5) so SteamAPI initialises correctly.
+        if (string.IsNullOrEmpty(uri) && _steam.IsSteamGamePath(path) &&
+            _steam.ResolveAppId(path) is { } appId)
+        {
+            uri = $"steam://rungameid/{appId}";
+            _log.Information("Resolved Steam appid {AppId} for {Exe}", appId, exeName);
+        }
+
         var viaUri = !string.IsNullOrEmpty(uri);
+        var viaSteam = viaUri && uri!.StartsWith("steam:", StringComparison.OrdinalIgnoreCase);
 
         // With a launch URI (e.g. steam://rungameid/…) the target is not our exe,
         // so we don't gate on the exe existing – Steam owns the game files.
@@ -74,6 +88,11 @@ public sealed class ProcessLauncher : IProcessLauncher
         if (entry.RunAsAdmin && !viaUri)
             psi.Verb = "runas"; // ShellExecute elevation prompt
 
+        // Bring Steam up (minimised, in the tray) before firing the game URI, so
+        // the client is ready and its window doesn't pop to the foreground.
+        if (viaSteam)
+            _steam.EnsureRunningMinimised();
+
         try
         {
             var process = _starter(psi);
@@ -92,7 +111,7 @@ public sealed class ProcessLauncher : IProcessLauncher
             _log.Error(ex, "Launch failed for {Target} (win32 {Code})",
                 viaUri ? uri : exeName, ex.NativeErrorCode);
 
-            if (viaUri && uri!.StartsWith("steam:", StringComparison.OrdinalIgnoreCase))
+            if (viaSteam)
                 return new LaunchOutcome(LaunchStatus.Failed,
                     "Impossible de démarrer ce jeu via Steam. Steam est-il installé et connecté ?", ex);
 

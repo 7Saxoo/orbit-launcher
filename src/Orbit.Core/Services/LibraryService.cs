@@ -245,7 +245,8 @@ public sealed class LibraryService : ILibraryService
             }
         }
 
-        var outcome = _launcher.Launch(entry);
+        // Off the UI thread: starting Steam minimised can block for a few seconds.
+        var outcome = await Task.Run(() => _launcher.Launch(entry), ct).ConfigureAwait(false);
         if (outcome.Succeeded)
             await _repository.RecordLaunchAsync(id, DateTimeOffset.Now, ct).ConfigureAwait(false);
 

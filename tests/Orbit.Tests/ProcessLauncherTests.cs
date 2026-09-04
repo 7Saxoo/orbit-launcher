@@ -10,10 +10,11 @@ namespace Orbit.Tests;
 public class ProcessLauncherTests
 {
     private readonly FakeExecutableInspector _inspector = new();
+    private readonly FakeSteamHelper _steam = new();
     private ProcessStartInfo? _captured;
 
     private ProcessLauncher Build(Func<ProcessStartInfo, Process?> starter) =>
-        new(_inspector, Logger.None, psi =>
+        new(_inspector, _steam, Logger.None, psi =>
         {
             _captured = psi;
             return starter(psi);
@@ -136,5 +137,43 @@ public class ProcessLauncherTests
 
         Assert.Equal(LaunchStatus.Failed, outcome.Status);
         Assert.Contains("Steam", outcome.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Launch_resolves_a_steam_appid_for_a_steamapps_exe_without_a_uri()
+    {
+        _steam.IsSteamPath = true;
+        _steam.AppIdToResolve = "292030";
+        var launcher = Build(_ => null);
+        var entry = Entry(path: @"D:\SteamLibrary\steamapps\common\The Witcher 3\witcher3.exe");
+
+        var outcome = launcher.Launch(entry);
+
+        Assert.Equal(LaunchStatus.Started, outcome.Status);
+        Assert.Equal("steam://rungameid/292030", _captured!.FileName);
+        Assert.Equal(1, _steam.EnsureRunningCalls); // Steam pre-started (minimised)
+    }
+
+    [Fact]
+    public void Launch_starts_steam_minimised_before_firing_a_steam_uri()
+    {
+        var launcher = Build(_ => null);
+        var entry = Entry();
+        entry.LaunchUri = "steam://rungameid/730";
+
+        launcher.Launch(entry);
+
+        Assert.Equal(1, _steam.EnsureRunningCalls);
+    }
+
+    [Fact]
+    public void Launch_does_not_touch_steam_for_a_plain_exe()
+    {
+        var launcher = Build(_ => null);
+
+        launcher.Launch(Entry());
+
+        Assert.Equal(0, _steam.EnsureRunningCalls);
+        Assert.EndsWith("game.exe", _captured!.FileName);
     }
 }

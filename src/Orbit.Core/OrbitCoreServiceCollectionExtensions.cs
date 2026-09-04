@@ -23,6 +23,7 @@ public static class OrbitCoreServiceCollectionExtensions
         services.AddSingleton<IAppRepository, SqliteAppRepository>();
         services.AddSingleton<IExecutableInspector, ExecutableInspector>();
         services.AddSingleton<IIconService, IconService>();
+        services.AddSingleton<ISteamHelper, SteamHelper>();
         services.AddSingleton<IProcessLauncher, ProcessLauncher>();
         services.AddSingleton<ISettingsService, JsonSettingsService>();
         services.AddSingleton<ILibraryService, LibraryService>();
