@@ -62,6 +62,10 @@ public sealed partial class LibraryViewModel : ObservableObject
     [ObservableProperty] private string _selectedCategory = AllCategories;
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private bool _hasLoadedOnce;
+    [ObservableProperty] private bool _isSelectionMode;
+
+    public int SelectedCount => Items.Count(t => t.IsSelected);
+    public bool HasSelection => SelectedCount > 0;
 
     public int VisibleCount => _view.Count;
 
@@ -100,9 +104,17 @@ public sealed partial class LibraryViewModel : ObservableObject
         {
             var items = await _library.LoadAsync().ConfigureAwait(true);
 
+            foreach (var old in Items)
+                old.PropertyChanged -= OnTilePropertyChanged;
             Items.Clear();
+
             foreach (var item in items)
-                Items.Add(new AppTileViewModel(item, _tileContext));
+            {
+                var tile = new AppTileViewModel(item, _tileContext) { SelectionMode = IsSelectionMode };
+                tile.PropertyChanged += OnTilePropertyChanged;
+                Items.Add(tile);
+            }
+            NotifySelection();
 
             RebuildCategories();
             HasLoadedOnce = true;
@@ -139,6 +151,61 @@ public sealed partial class LibraryViewModel : ObservableObject
 
     [RelayCommand]
     private Task Reload() => RefreshAsync();
+
+    [RelayCommand]
+    private void ToggleSelectionMode() => IsSelectionMode = !IsSelectionMode;
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private async Task DeleteSelectedAsync()
+    {
+        var targets = Items.Where(t => t.IsSelected).Select(t => t.Id).ToList();
+        if (targets.Count == 0)
+            return;
+
+        if (!_tileContext.Dialogs.Confirm("Supprimer la sélection",
+                $"Retirer {targets.Count} application(s) de la bibliothèque ?\n\n" +
+                "Les fichiers .exe d'origine ne sont pas supprimés."))
+        {
+            return;
+        }
+
+        try
+        {
+            var removed = await _library.RemoveManyAsync(targets).ConfigureAwait(true);
+            IsSelectionMode = false;
+            _tileContext.Host.SetStatus($"{removed} application(s) retirée(s).", StatusSeverity.Warning);
+            await _tileContext.Host.RefreshAllAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            _log.Error(ex, "Bulk delete failed");
+            _tileContext.Dialogs.ShowError("Suppression impossible", ex.Message);
+        }
+    }
+
+    partial void OnIsSelectionModeChanged(bool value)
+    {
+        foreach (var tile in Items)
+        {
+            tile.SelectionMode = value;
+            if (!value)
+                tile.IsSelected = false;
+        }
+        NotifySelection();
+    }
+
+    private void OnTilePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(AppTileViewModel.IsSelected))
+            NotifySelection();
+    }
+
+    private void NotifySelection()
+    {
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+        DeleteSelectedCommand.NotifyCanExecuteChanged();
+    }
 
     partial void OnSearchTextChanged(string value) => _view.Refresh();
 

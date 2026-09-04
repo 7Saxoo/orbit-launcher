@@ -7,8 +7,51 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance vm:AppTileViewModel}"
              d:DesignWidth="264">
-    <Border Style="{StaticResource Card}" Width="264" Margin="0,0,16,16" Padding="0"
-            ClipToBounds="True">
+    <Border x:Name="Root" Width="264" Margin="0,0,16,16" Padding="0"
+            ClipToBounds="True" RenderTransformOrigin="0.5,0.5">
+        <Border.RenderTransform>
+            <TranslateTransform Y="0" />
+        </Border.RenderTransform>
+        <Border.Style>
+            <Style TargetType="Border" BasedOn="{StaticResource Card}">
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Accent}" />
+                        <Trigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation
+                                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                        To="-4" Duration="0:0:0.13">
+                                        <DoubleAnimation.EasingFunction>
+                                            <CubicEase EasingMode="EaseOut" />
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation
+                                        Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                        To="0" Duration="0:0:0.16">
+                                        <DoubleAnimation.EasingFunction>
+                                            <CubicEase EasingMode="EaseOut" />
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
+                    </Trigger>
+                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Accent}" />
+                        <Setter Property="Background" Value="{DynamicResource Brush.Accent.Soft}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+
         <StackPanel>
 
             <!-- Banner -->
@@ -18,10 +61,17 @@
                        Source="{Binding IconPath, Converter={StaticResource IconToImage}}"
                        RenderOptions.BitmapScalingMode="HighQuality" />
 
+                <!-- Selection checkbox (multi-delete mode) -->
+                <CheckBox VerticalAlignment="Top" HorizontalAlignment="Left" Margin="8"
+                          IsChecked="{Binding IsSelected}"
+                          Visibility="{Binding SelectionMode, Converter={StaticResource BoolToVisibility}}" />
+
+                <!-- Favourite star (normal mode) -->
                 <ToggleButton VerticalAlignment="Top" HorizontalAlignment="Left" Margin="8"
                               Cursor="Hand" Background="Transparent" BorderThickness="0"
                               IsChecked="{Binding IsFavorite, Mode=OneWay}"
-                              Command="{Binding ToggleFavoriteCommand}" ToolTip="Favori">
+                              Command="{Binding ToggleFavoriteCommand}" ToolTip="Favori"
+                              Visibility="{Binding SelectionMode, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}">
                     <ToggleButton.Style>
                         <Style TargetType="ToggleButton">
                             <Setter Property="Content" Value="☆" />
@@ -50,7 +100,8 @@
                         Content="⋯" FontSize="17" Cursor="Hand"
                         Foreground="{DynamicResource Brush.Text.OnAccent}"
                         Command="{Binding OpenSettingsCommand}"
-                        ToolTip="Paramètres de l'application">
+                        ToolTip="Paramètres de l'application"
+                        Visibility="{Binding SelectionMode, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border x:Name="b" Background="#33000000" CornerRadius="7" Padding="7,0,7,4">
@@ -83,7 +134,13 @@
                 <Button Margin="0,12,0,0" Style="{StaticResource Button.Accent}"
                         HorizontalAlignment="Stretch"
                         Content="{Binding PrimaryActionLabel}"
-                        Command="{Binding LaunchCommand}" />
+                        Command="{Binding LaunchCommand}"
+                        Visibility="{Binding SelectionMode, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}" />
+
+                <Button Margin="0,12,0,0" Style="{StaticResource Button.Base}"
+                        HorizontalAlignment="Stretch" Content="Sélectionner / retirer"
+                        Command="{Binding ToggleSelectedCommand}"
+                        Visibility="{Binding SelectionMode, Converter={StaticResource BoolToVisibility}}" />
             </StackPanel>
         </StackPanel>
     </Border>

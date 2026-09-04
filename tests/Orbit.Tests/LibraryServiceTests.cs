@@ -191,6 +191,20 @@ public class LibraryServiceTests
     }
 
     [Fact]
+    public async Task RemoveManyAsync_removes_all_targets_and_reports_count()
+    {
+        var a = await _service.AddAsync(Request(@"C:\A\a.exe", "A"));
+        var b = await _service.AddAsync(Request(@"C:\B\b.exe", "B"));
+        await _service.AddAsync(Request(@"C:\C\c.exe", "C"));
+
+        var removed = await _service.RemoveManyAsync(new[] { a.Id, b.Id, Guid.NewGuid() });
+
+        Assert.Equal(2, removed);
+        Assert.Single(_repo.Snapshot);
+        Assert.Equal("C", _repo.Snapshot[0].Name);
+    }
+
+    [Fact]
     public async Task IsRunning_delegates_to_launcher()
     {
         var entry = await _service.AddAsync(Request());

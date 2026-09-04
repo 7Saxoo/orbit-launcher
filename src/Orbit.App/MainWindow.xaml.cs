@@ -19,9 +19,15 @@ public partial class MainWindow : Window, IWindowService
         WindowThemeHelper.Attach(this);
 
         var s = settings.Current;
-        Width = Math.Max(MinWidth, s.WindowWidth);
-        Height = Math.Max(MinHeight, s.WindowHeight);
-        WindowState = s.WindowMaximized ? WindowState.Maximized : WindowState.Normal;
+        if (s.WindowWidth <= 0 || s.WindowHeight <= 0)
+            FitToScreen();
+        else if (s.WindowMaximized)
+            WindowState = WindowState.Maximized;
+        else
+        {
+            Width = Math.Max(MinWidth, s.WindowWidth);
+            Height = Math.Max(MinHeight, s.WindowHeight);
+        }
 
         Application.Current.Exit += (_, _) => PersistSize();
     }
@@ -32,12 +38,34 @@ public partial class MainWindow : Window, IWindowService
         {
             WindowState = WindowState.Maximized;
         }
+        else if (width <= 0 || height <= 0)
+        {
+            WindowState = WindowState.Normal;
+            FitToScreen();
+        }
         else
         {
             WindowState = WindowState.Normal;
             Width = width;
             Height = height;
+            RecentreOnScreen();
         }
+    }
+
+    /// <summary>Sizes the window to ~92% of the current screen's work area and centres it.</summary>
+    private void FitToScreen()
+    {
+        var area = SystemParameters.WorkArea;
+        Width = Math.Max(MinWidth, area.Width * 0.92);
+        Height = Math.Max(MinHeight, area.Height * 0.92);
+        RecentreOnScreen();
+    }
+
+    private void RecentreOnScreen()
+    {
+        var area = SystemParameters.WorkArea;
+        Left = area.Left + (area.Width - Width) / 2;
+        Top = area.Top + (area.Height - Height) / 2;
     }
 
     private void PersistSize()

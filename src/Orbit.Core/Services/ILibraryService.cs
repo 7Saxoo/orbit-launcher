@@ -28,6 +28,10 @@ public interface ILibraryService
     /// <summary>Removes an entry. The executable on disk is never touched.</summary>
     Task RemoveAsync(Guid id, CancellationToken ct = default);
 
+    /// <summary>Removes several entries in one go. Executables are never touched.
+    /// Returns the number actually removed.</summary>
+    Task<int> RemoveManyAsync(IEnumerable<Guid> ids, CancellationToken ct = default);
+
     Task<AppEntry> SetFavoriteAsync(Guid id, bool favorite, CancellationToken ct = default);
 
     /// <summary>Launches an entry and records the launch in its statistics.</summary>

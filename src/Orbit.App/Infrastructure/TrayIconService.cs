@@ -41,8 +41,9 @@ public sealed class TrayIconService : IDisposable
         };
         _tray.TrayMouseDoubleClick += (_, _) => Restore();
 
+        // Only *closing* the window sends Orbit to the tray. Minimising with the
+        // caption button behaves like a normal window minimise.
         window.Closing += OnClosing;
-        window.StateChanged += OnStateChanged;
         Application.Current.Exit += (_, _) => Dispose();
     }
 
@@ -71,12 +72,6 @@ public sealed class TrayIconService : IDisposable
         HideToTray();
     }
 
-    private void OnStateChanged(object? sender, EventArgs e)
-    {
-        if (_window?.WindowState == WindowState.Minimized && _settings.Current.MinimizeToTrayOnClose)
-            HideToTray();
-    }
-
     private void HideToTray()
     {
         if (_window is null)
@@ -84,18 +79,17 @@ public sealed class TrayIconService : IDisposable
 
         _window.Hide();
         PowerManager.EnterLowPower();
-        _log.Information("Orbit hidden to tray, low-power mode engaged");
-
         try
         {
             _tray?.ShowBalloonTip("Orbit",
-                "Orbit tourne en arrière-plan (consommation réduite). Double-cliquez l'icône pour revenir.",
-                BalloonIcon.Info);
+                "Toujours là, en arrière-plan — double-cliquez l'icône pour revenir.", BalloonIcon.Info);
         }
         catch (Exception ex)
         {
             _log.Debug(ex, "Balloon tip failed");
         }
+
+        _log.Information("Orbit hidden to tray, low-power mode engaged");
     }
 
     private void Restore()

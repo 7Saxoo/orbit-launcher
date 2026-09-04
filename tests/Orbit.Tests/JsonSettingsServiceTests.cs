@@ -16,7 +16,12 @@ public class JsonSettingsServiceTests
 
         Assert.True(File.Exists(ws.Paths.SettingsFile));
         Assert.Equal(ThemePreference.Dark, service.Current.Theme);
+        Assert.Equal(AccentTemperature.Cool, service.Current.Temperature);
         Assert.True(service.Current.ConfirmBeforeRemove);
+        Assert.True(service.Current.MinimizeToTrayOnClose);
+        // 0 = "fit to screen on first launch"
+        Assert.Equal(0, service.Current.WindowWidth);
+        Assert.Equal(0, service.Current.WindowHeight);
     }
 
     [Fact]

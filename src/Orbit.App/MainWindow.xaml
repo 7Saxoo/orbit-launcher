@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Orbit.App.ViewModels"
+        xmlns:inf="clr-namespace:Orbit.App.Infrastructure"
         mc:Ignorable="d"
         Title="Orbit — Centralisateur d'applications et de jeux"
         Height="780" Width="1280" MinHeight="560" MinWidth="940"
@@ -149,7 +150,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Style="{StaticResource Text.Caption}"
-                               Text="Orbit v1.1.0 · developed by Saxo" />
+                               Text="Orbit v1.2.0 · developed by Saxo" />
                     <TextBlock Grid.Column="1" Style="{StaticResource Text.Caption}" Margin="16,0,0,0"
                                Text="{Binding StatusMessage}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Column="2" Style="{StaticResource Text.Caption}"
@@ -158,7 +159,7 @@
                 </Grid>
             </Border>
 
-            <ContentControl Content="{Binding CurrentContent}" />
+            <inf:FadeContentControl Content="{Binding CurrentContent}" ClipToBounds="True" />
         </DockPanel>
     </Grid>
 </Window>

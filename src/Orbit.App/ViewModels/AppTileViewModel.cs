@@ -46,6 +46,15 @@ public sealed partial class AppTileViewModel : ObservableObject
     [ObservableProperty] private bool _isFavorite;
     [ObservableProperty] private bool _isBusy;
 
+    /// <summary>Set by the library VM when bulk-selection mode is active.</summary>
+    [ObservableProperty] private bool _selectionMode;
+
+    /// <summary>Ticked in bulk-selection mode. Watched by the library VM.</summary>
+    [ObservableProperty] private bool _isSelected;
+
+    [RelayCommand]
+    private void ToggleSelected() => IsSelected = !IsSelected;
+
     public bool IsMissing => Availability != AppAvailability.Available;
 
     partial void OnAvailabilityChanged(AppAvailability value)

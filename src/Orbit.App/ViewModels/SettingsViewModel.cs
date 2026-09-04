@@ -79,6 +79,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     public IReadOnlyList<WindowSizeOption> WindowSizeOptions { get; } = new[]
     {
+        new WindowSizeOption(0, 0, false, "Adaptée à l'écran"),
         new WindowSizeOption(1280, 720, false, "1280 × 720"),
         new WindowSizeOption(1600, 900, false, "1600 × 900"),
         new WindowSizeOption(1920, 1080, false, "1920 × 1080"),

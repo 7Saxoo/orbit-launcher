@@ -11,6 +11,7 @@
     <Grid Margin="28,6,28,12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -47,11 +48,57 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
+
+                <ToggleButton Margin="14,0,0,0" Cursor="Hand" Content="☑  Sélectionner"
+                              IsChecked="{Binding IsSelectionMode}"
+                              VerticalAlignment="Stretch" Padding="14,8"
+                              Foreground="{DynamicResource Brush.Text.Primary}"
+                              FontFamily="{StaticResource Font.Primary}" FontSize="13">
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border x:Name="b" Background="{DynamicResource Brush.Surface}"
+                                    BorderBrush="{DynamicResource Brush.Control.Border}" BorderThickness="1"
+                                    CornerRadius="9" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="b" Property="Background" Value="{DynamicResource Brush.Accent}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource Brush.Text.OnAccent}" />
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="b" Property="BorderBrush" Value="{DynamicResource Brush.Accent}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
+                </ToggleButton>
             </StackPanel>
         </Grid>
 
+        <!-- Selection action bar -->
+        <Border Grid.Row="1" Margin="0,0,0,12" Padding="14,10" CornerRadius="10"
+                Background="{DynamicResource Brush.Accent.Soft}"
+                BorderBrush="{DynamicResource Brush.Accent}" BorderThickness="1"
+                Visibility="{Binding IsSelectionMode, Converter={StaticResource BoolToVisibility}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center"
+                           Text="{Binding SelectedCount, StringFormat='{}{0} application(s) sélectionnée(s) — cochez les cartes à retirer'}" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="Annuler" Style="{StaticResource Button.Ghost}" Margin="0,0,10,0"
+                            Command="{Binding ToggleSelectionModeCommand}" />
+                    <Button Content="🗑  Supprimer la sélection" Style="{StaticResource Button.Danger}"
+                            Command="{Binding DeleteSelectedCommand}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
         <!-- Content -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                           Padding="0,0,4,0">
                 <ItemsControl ItemsSource="{Binding ItemsView}">

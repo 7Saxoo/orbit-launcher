@@ -51,6 +51,8 @@ chemin, quelques métadonnées et une icône mise en cache.
 - **Filtres** par section (Bibliothèque / Jeux / Applications / Favoris) et par
   catégorie.
 - **Tri** par nom, ajout récent, nombre de lancements ou dernier lancement.
+- **Sélection multiple** : le bouton « ☑ Sélectionner » de la bibliothèque coche
+  plusieurs cartes puis les retire d'un coup (les `.exe` ne sont pas supprimés).
 - **Favoris**.
 - **Paramètres de l'application** (menu ⋯ de chaque carte) : modifier, définir
   les options de lancement (arguments, dossier de travail, **lancer en
@@ -58,12 +60,17 @@ chemin, quelques métadonnées et une icône mise en cache.
   lancer, ou supprimer de la bibliothèque.
 - **Thème** clair / sombre / système + **température des couleurs** au choix :
   **froide** (bleu) ou **chaude** (ambre), appliqué à chaud. Police **Poppins**
-  embarquée. Interface épurée façon tableau de bord.
-- **Fenêtre** : taille réglable depuis les paramètres (1280×720, 1600×900,
-  **1920×1080**, maximisée) ; la dimension est mémorisée.
-- **Réduction dans la zone de notification** : fermer la fenêtre la garde en
+  embarquée. Interface épurée façon tableau de bord, **barre de titre et barres
+  de défilement thématisées**, transitions de section animées.
+- **Fenêtre** : « adaptée à l'écran » au premier lancement, puis taille réglable
+  depuis les paramètres (1280×720, 1600×900, **1920×1080**, maximisée) et
+  mémorisée.
+- **Instance unique** : relancer Orbit ramène la fenêtre existante au premier
+  plan au lieu d'ouvrir une seconde fenêtre.
+- **Fermeture → zone de notification** : le bouton *Fermer* garde Orbit en
   arrière-plan avec une **consommation réduite** (priorité processus abaissée,
-  mémoire de travail relâchée). Menu de la zone de notification : Ouvrir / Quitter.
+  mémoire de travail relâchée) ; le bouton *Réduire* reste une réduction
+  classique. Menu de la zone de notification : Ouvrir / Quitter.
 - **Persistance locale** en SQLite : les données survivent à la fermeture, au
   redémarrage du PC et à une mise à jour de l'application.
 - **Journalisation** dans des fichiers rotatifs quotidiens.
@@ -83,7 +90,7 @@ chemin, quelques métadonnées et une icône mise en cache.
 | Injection de dépendances | `Microsoft.Extensions.Hosting` / `DependencyInjection` | Composition centralisée. |
 | Journalisation | **Serilog** (`Sinks.File`, `Sinks.Debug`) | Fichiers rotatifs, format lisible. |
 | Zone de notification | **Hardcodet.NotifyIcon.Wpf** | Icône de tray + menu, sans dépendance WinForms. |
-| Tests | **xUnit** | 87 tests unitaires et d'intégration. |
+| Tests | **xUnit** | 88 tests unitaires et d'intégration. |
 
 ---
 
@@ -102,11 +109,27 @@ chemin, quelques métadonnées et une icône mise en cache.
 
 ## Installation
 
-### À partir d'une version publiée
+### Avec le programme d'installation (recommandé)
 
-1. Récupérer le dossier `publish/` (voir [Publication](#publication-version-distribuable)).
-2. Lancer `Orbit.exe`. Aucune installation, aucune clé de registre : Orbit écrit
-   uniquement dans `%LOCALAPPDATA%\Orbit`.
+Lancer **`OrbitSetup-<version>.exe`** (dans `publish/`). L'assistant :
+
+- s'installe **sans droits administrateur** (par utilisateur) et laisse
+  **choisir le dossier d'installation** — n'importe où ; possibilité d'élever
+  pour installer pour tous les utilisateurs ;
+- crée les raccourcis menu Démarrer / bureau et un **désinstalleur**.
+
+Reconstruire l'installeur :
+
+```bash
+winget install JRSoftware.InnoSetup   # une fois
+pwsh installer/build-installer.ps1     # publie puis compile publish/OrbitSetup-*.exe
+```
+
+### Sans installation (portable)
+
+1. Récupérer `publish/Orbit.exe` (voir [Publication](#publication-version-distribuable)).
+2. Le lancer directement. Aucune clé de registre : Orbit n'écrit que dans
+   `%LOCALAPPDATA%\Orbit`.
 
 ### À partir des sources
 
@@ -157,6 +180,14 @@ dotnet publish src/Orbit.App/Orbit.App.csproj -c Release -r win-x64 --self-conta
 
 Le binaire produit s'appelle `Orbit.exe`.
 
+**Programme d'installation** (Inno Setup) :
+
+```bash
+pwsh installer/build-installer.ps1
+```
+
+Produit `publish/OrbitSetup-<version>.exe`. Script : [`installer/Orbit.iss`](installer/Orbit.iss).
+
 ---
 
 ## Structure du projet
@@ -180,17 +211,21 @@ Orbit.sln
 │       ├── App.xaml(.cs)           # Bootstrap : host DI, Serilog, thème, exceptions globales
 │       ├── MainWindow.xaml(.cs)    # Coquille : rail de navigation + contenu + barre d'état
 │       ├── Infrastructure/         # OrbitLogging, ThemeManager (4 palettes),
-│       │                           #   TrayIconService, PowerManager
+│       │                           #   WindowThemeHelper, TrayIconService, PowerManager,
+│       │                           #   SingleInstanceGuard, FadeContentControl
 │       ├── Converters/             # Convertisseurs de binding
-│       ├── Services/               # DialogService, AddAppFlow, DetectionFlow
-│       ├── ViewModels/             # Main, Home, Library, AppTile, Settings, Add/Edit, Detection
+│       ├── Services/               # DialogService, AddAppFlow, DetectionFlow, IWindowService
+│       ├── ViewModels/             # Main, Home, Library, AppTile, Settings,
+│       │                           #   AppSettings, Add, Detection
 │       ├── Views/                  # HomeView, LibraryView, SettingsView, AppTile,
-│       │                           #   AppFormWindow, DetectionWindow
-│       ├── Resources/              # Themes/Light.xaml, Themes/Dark.xaml, Controls.xaml
-│       └── Assets/                 # orbit.ico, default-app-icon.png, Fonts/ (Poppins)
+│       │                           #   AppFormWindow, AppSettingsWindow, DetectionWindow
+│       ├── Resources/              # Themes/Theme.{Light,Dark}{Cool,Warm}.xaml, Controls.xaml
+│       └── Assets/                 # orbit.ico, orbit-mark.png, default-app-icon.png, Fonts/
+│
+├── installer/                     # Orbit.iss (Inno Setup) + build-installer.ps1
 │
 └── tests/
-    └── Orbit.Tests/               # xUnit : PathHelper, base SQLite, services, icônes, intégration
+    └── Orbit.Tests/               # xUnit : PathHelper, base SQLite, services, détection, intégration
 ```
 
 ### Séparation des responsabilités
@@ -249,7 +284,7 @@ d'installation, qui peut être en lecture seule) :
 dotnet test
 ```
 
-**87 tests** (xUnit), notamment :
+**88 tests** (xUnit), notamment :
 
 - **`PathHelperTests`** — normalisation (guillemets, espaces, variables
   d'environnement, accents), comparaison de chemins insensible à la casse et au
@@ -276,7 +311,7 @@ dotnet test
   fichier → correction du chemin → lancement ; et réinitialisation qui n'altère
   jamais le `.exe` source.
 
-Résultat de la dernière exécution : **87 réussis, 0 échec**.
+Résultat de la dernière exécution : **88 réussis, 0 échec**.
 
 En complément, l'application a été **réellement démarrée** (build Release) :
 création de `orbit.db` + migration, écriture de `settings.json`, initialisation de

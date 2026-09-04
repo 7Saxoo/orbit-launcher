@@ -38,8 +38,9 @@ public sealed class AppSettings
     public string LastSection { get; set; } = "Home";
 
     // ---- Window ----
-    public int WindowWidth { get; set; } = 1280;
-    public int WindowHeight { get; set; } = 780;
+    // 0 = "not chosen yet": Orbit fits itself to the current screen on launch.
+    public int WindowWidth { get; set; }
+    public int WindowHeight { get; set; }
     public bool WindowMaximized { get; set; }
 
     /// <summary>Closing the window hides it to the notification area instead of quitting.</summary>

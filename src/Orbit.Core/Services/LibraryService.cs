@@ -150,6 +150,32 @@ public sealed class LibraryService : ILibraryService
         _log.Information("Removed entry {Id} (executable left untouched on disk)", id);
     }
 
+    public async Task<int> RemoveManyAsync(IEnumerable<Guid> ids, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+
+        var removed = 0;
+        foreach (var id in ids.Distinct())
+        {
+            ct.ThrowIfCancellationRequested();
+            try
+            {
+                if (await _repository.GetByIdAsync(id, ct).ConfigureAwait(false) is null)
+                    continue;
+
+                await _repository.DeleteAsync(id, ct).ConfigureAwait(false);
+                removed++;
+            }
+            catch (Exception ex)
+            {
+                _log.Warning(ex, "Could not remove entry {Id} during bulk delete", id);
+            }
+        }
+
+        _log.Information("Bulk removed {Count} entr(y/ies) (executables left untouched)", removed);
+        return removed;
+    }
+
     public async Task<AppEntry> SetFavoriteAsync(Guid id, bool favorite, CancellationToken ct = default)
     {
         var entry = await _repository.GetByIdAsync(id, ct).ConfigureAwait(false)

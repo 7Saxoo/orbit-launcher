@@ -20,10 +20,22 @@ public partial class App : Application
 {
     private IHost? _host;
     private ILogger _log = Serilog.Core.Logger.None;
+    private SingleInstanceGuard? _instanceGuard;
 
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // Single-instance: a second launch just wakes the running one.
+        _instanceGuard = new SingleInstanceGuard();
+        if (!_instanceGuard.TryAcquire())
+        {
+            SingleInstanceGuard.SignalPrimary();
+            _instanceGuard.Dispose();
+            _instanceGuard = null;
+            Shutdown();
+            return;
+        }
 
         var paths = new OrbitPaths();
         paths.EnsureDirectories();
@@ -54,6 +66,9 @@ public partial class App : Application
             _host.Services.GetRequiredService<TrayIconService>().Attach(window);
             window.Show();
 
+            if (_instanceGuard is not null)
+                _instanceGuard.ActivationRequested += () => Dispatcher.Invoke(BringMainWindowToFront);
+
             await main.InitializeAsync().ConfigureAwait(true);
         }
         catch (Exception ex)
@@ -69,9 +84,24 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         _log.Information("Orbit exiting (code {Code})", e.ApplicationExitCode);
+        _instanceGuard?.Dispose();
         _host?.Dispose();
         Log.CloseAndFlush();
         base.OnExit(e);
+    }
+
+    private void BringMainWindowToFront()
+    {
+        if (MainWindow is not { } window)
+            return;
+
+        PowerManager.ExitLowPower();
+        window.Show();
+        window.WindowState = WindowState.Normal;
+        window.Activate();
+        window.Topmost = true;
+        window.Topmost = false;
+        _log.Information("Activated by a second launch");
     }
 
     private static IHost BuildHost(OrbitPaths paths) =>
