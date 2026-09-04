@@ -156,15 +156,17 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0" MaxWidth="420" HorizontalAlignment="Left"
+                    <Grid Grid.Column="0" MinWidth="320" MaxWidth="560" Margin="0,0,24,0"
+                          HorizontalAlignment="Stretch"
                           Visibility="{Binding IsSearchVisible, Converter={StaticResource BoolToVisibility}}">
-                        <TextBox x:Name="SearchBox" Style="{StaticResource TextBox.Base}" Padding="30,8,10,8"
+                        <TextBox x:Name="SearchBox" Style="{StaticResource TextBox.Base}"
+                                 Padding="34,10,12,10" FontSize="13"
                                  Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, Delay=150}" />
-                        <TextBlock Text="&#xE721;" FontFamily="{StaticResource Font.Icons}" FontSize="12"
-                                   IsHitTestVisible="False" Margin="11,0,0,0" VerticalAlignment="Center"
+                        <TextBlock Text="&#xE721;" FontFamily="{StaticResource Font.Icons}" FontSize="13"
+                                   IsHitTestVisible="False" Margin="13,0,0,0" VerticalAlignment="Center"
                                    Foreground="{DynamicResource Brush.Text.Secondary}" />
-                        <TextBlock Text="Rechercher…" IsHitTestVisible="False"
-                                   Margin="30,0,0,0" VerticalAlignment="Center"
+                        <TextBlock Text="Rechercher une application ou un jeu…" IsHitTestVisible="False"
+                                   Margin="34,0,0,0" VerticalAlignment="Center"
                                    Foreground="{DynamicResource Brush.Text.Secondary}"
                                    Visibility="{Binding Text, ElementName=SearchBox, Converter={StaticResource StringToVisibility}, ConverterParameter=invert}" />
                     </Grid>
@@ -200,7 +202,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Style="{StaticResource Text.Caption}"
-                               Text="Orbit v1.6.0 · developed by Saxo" />
+                               Text="Orbit v1.7.0 · developed by Saxo" />
                     <TextBlock Grid.Column="1" Style="{StaticResource Text.Caption}" Margin="16,0,0,0"
                                Text="{Binding StatusMessage}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Column="2" Style="{StaticResource Text.Caption}"

@@ -11,6 +11,18 @@
         <DataTemplate x:Key="LabelOnly">
             <TextBlock Text="{Binding Label}" />
         </DataTemplate>
+
+        <!-- Coloured preview: a chip filled with the option's own background,
+             its label in the option's own text colour, and an accent dot. -->
+        <DataTemplate x:Key="ColourSwatch">
+            <Border CornerRadius="5" Padding="10,6" Margin="-2,0" Background="{Binding Bg}">
+                <StackPanel Orientation="Horizontal">
+                    <Border Width="11" Height="11" CornerRadius="6" Margin="0,0,9,0"
+                            Background="{Binding Accent}" />
+                    <TextBlock Text="{Binding Label}" Foreground="{Binding Fg}" />
+                </StackPanel>
+            </Border>
+        </DataTemplate>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,6,28,20">
@@ -31,9 +43,9 @@
                             <TextBlock Text="Thème" />
                             <TextBlock Text="Clair, sombre ou selon Windows" Style="{StaticResource Text.Caption}" />
                         </StackPanel>
-                        <ComboBox Grid.Column="1" Width="190" Style="{StaticResource ComboBox.Base}"
+                        <ComboBox Grid.Column="1" Width="200" Style="{StaticResource ComboBox.Base}"
                                   ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding SelectedTheme}"
-                                  ItemTemplate="{StaticResource LabelOnly}" />
+                                  ItemTemplate="{StaticResource ColourSwatch}" />
                     </Grid>
 
                     <Grid Margin="0,14,0,0">
@@ -45,9 +57,9 @@
                             <TextBlock Text="Température des couleurs" />
                             <TextBlock Text="Palette froide (bleu) ou chaude (ambre)" Style="{StaticResource Text.Caption}" />
                         </StackPanel>
-                        <ComboBox Grid.Column="1" Width="190" Style="{StaticResource ComboBox.Base}"
+                        <ComboBox Grid.Column="1" Width="200" Style="{StaticResource ComboBox.Base}"
                                   ItemsSource="{Binding TemperatureOptions}" SelectedItem="{Binding SelectedTemperature}"
-                                  ItemTemplate="{StaticResource LabelOnly}" />
+                                  ItemTemplate="{StaticResource ColourSwatch}" />
                     </Grid>
 
                     <Grid Margin="0,14,0,0">

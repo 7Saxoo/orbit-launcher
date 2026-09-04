@@ -9,8 +9,11 @@ using Serilog;
 
 namespace Orbit.App.ViewModels;
 
-public sealed record ThemeOption(ThemePreference Value, string Label);
-public sealed record TemperatureOption(AccentTemperature Value, string Label);
+/// <summary>A theme choice plus the colours used to preview it in the dropdown.</summary>
+public sealed record ThemeOption(ThemePreference Value, string Label, string Bg, string Fg, string Accent);
+
+/// <summary>An accent-temperature choice plus its preview colours.</summary>
+public sealed record TemperatureOption(AccentTemperature Value, string Label, string Bg, string Fg, string Accent);
 public sealed record WindowSizeOption(int Width, int Height, bool Maximized, string Label);
 public sealed record UiScaleOption(double Scale, string Label);
 
@@ -60,15 +63,15 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     public IReadOnlyList<ThemeOption> ThemeOptions { get; } = new[]
     {
-        new ThemeOption(ThemePreference.System, "Système"),
-        new ThemeOption(ThemePreference.Light, "Clair"),
-        new ThemeOption(ThemePreference.Dark, "Sombre"),
+        new ThemeOption(ThemePreference.System, "Système", "#26304A", "#E9EFFA", "#7B8CB0"),
+        new ThemeOption(ThemePreference.Light,  "Clair",   "#F4F7FC", "#1A2233", "#2F6FED"),
+        new ThemeOption(ThemePreference.Dark,   "Sombre",  "#0F1524", "#E9EFFA", "#4C7DF0"),
     };
 
     public IReadOnlyList<TemperatureOption> TemperatureOptions { get; } = new[]
     {
-        new TemperatureOption(AccentTemperature.Cool, "Froide (bleu)"),
-        new TemperatureOption(AccentTemperature.Warm, "Chaude (ambre)"),
+        new TemperatureOption(AccentTemperature.Cool, "Froide (bleu)",  "#1B2A4A", "#DCE6FA", "#4C7DF0"),
+        new TemperatureOption(AccentTemperature.Warm, "Chaude (ambre)", "#3A2A1C", "#F5E7D6", "#F0975A"),
     };
 
     public IReadOnlyList<SortOption> SortOptions { get; } = new[]
