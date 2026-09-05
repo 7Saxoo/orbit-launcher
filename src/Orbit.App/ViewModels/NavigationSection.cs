@@ -4,8 +4,5 @@ public enum NavigationSection
 {
     Home,
     Library,
-    Games,
-    Applications,
-    Favorites,
     Settings
 }

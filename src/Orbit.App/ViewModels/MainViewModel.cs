@@ -6,7 +6,9 @@ using Serilog;
 namespace Orbit.App.ViewModels;
 
 /// <summary>Shell view-model: navigation, the shared search box, the status bar,
-/// and the <see cref="ITileHost"/> implementation tiles call back into.</summary>
+/// and the <see cref="ITileHost"/> implementation tiles call back into. All three
+/// section views stay alive; navigation only flips visibility, so switching is
+/// instant.</summary>
 public sealed partial class MainViewModel : ObservableObject, ITileHost
 {
     private readonly ISettingsService _settings;
@@ -28,12 +30,11 @@ public sealed partial class MainViewModel : ObservableObject, ITileHost
 
         tileContext.Host = this;
         Settings.Host = this;
-        _currentContent = Home;
 
         if (Enum.TryParse<NavigationSection>(_settings.Current.LastSection, out var restored))
             _currentSection = restored;
 
-        UpdateContent();
+        RaiseSectionFlags();
     }
 
     public HomeViewModel Home { get; }
@@ -41,12 +42,14 @@ public sealed partial class MainViewModel : ObservableObject, ITileHost
     public SettingsViewModel Settings { get; }
 
     [ObservableProperty] private NavigationSection _currentSection = NavigationSection.Home;
-    [ObservableProperty] private object _currentContent;
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private string _statusMessage = string.Empty;
     [ObservableProperty] private StatusSeverity _statusSeverity = StatusSeverity.Info;
-    [ObservableProperty] private bool _isSearchVisible;
     [ObservableProperty] private bool _isRefreshing;
+
+    public bool IsHome => CurrentSection == NavigationSection.Home;
+    public bool IsLibrary => CurrentSection == NavigationSection.Library;
+    public bool IsSettings => CurrentSection == NavigationSection.Settings;
 
     [RelayCommand]
     private void Navigate(NavigationSection section) => CurrentSection = section;
@@ -84,43 +87,17 @@ public sealed partial class MainViewModel : ObservableObject, ITileHost
 
     partial void OnCurrentSectionChanged(NavigationSection value)
     {
-        UpdateContent();
+        RaiseSectionFlags();
         PersistLastSection(value);
     }
 
     partial void OnSearchTextChanged(string value) => Library.SearchText = value;
 
-    private void UpdateContent()
+    private void RaiseSectionFlags()
     {
-        IsSearchVisible = CurrentSection is
-            NavigationSection.Library or NavigationSection.Games or
-            NavigationSection.Applications or NavigationSection.Favorites;
-
-        switch (CurrentSection)
-        {
-            case NavigationSection.Home:
-                CurrentContent = Home;
-                break;
-            case NavigationSection.Settings:
-                CurrentContent = Settings;
-                break;
-            case NavigationSection.Games:
-                Library.FilterMode = LibraryFilterMode.Games;
-                CurrentContent = Library;
-                break;
-            case NavigationSection.Applications:
-                Library.FilterMode = LibraryFilterMode.Applications;
-                CurrentContent = Library;
-                break;
-            case NavigationSection.Favorites:
-                Library.FilterMode = LibraryFilterMode.Favorites;
-                CurrentContent = Library;
-                break;
-            default:
-                Library.FilterMode = LibraryFilterMode.All;
-                CurrentContent = Library;
-                break;
-        }
+        OnPropertyChanged(nameof(IsHome));
+        OnPropertyChanged(nameof(IsLibrary));
+        OnPropertyChanged(nameof(IsSettings));
     }
 
     private void PersistLastSection(NavigationSection section)

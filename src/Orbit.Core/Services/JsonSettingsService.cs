@@ -17,6 +17,7 @@ public sealed class JsonSettingsService : ISettingsService
 
     private readonly OrbitPaths _paths;
     private readonly ILogger _log;
+    private readonly SemaphoreSlim _writeLock = new(1, 1);
     private AppSettings _current = new();
 
     public JsonSettingsService(OrbitPaths paths, ILogger log)
@@ -58,16 +59,48 @@ public sealed class JsonSettingsService : ISettingsService
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        Directory.CreateDirectory(_paths.BaseDirectory);
-        var json = JsonSerializer.Serialize(settings, SerializerOptions);
+        // Serialise concurrent saves (nav, window resize and the settings page can
+        // all fire at once) so the temp file is never written by two callers.
+        await _writeLock.WaitAsync(ct).ConfigureAwait(false);
+        try
+        {
+            Directory.CreateDirectory(_paths.BaseDirectory);
+            var json = JsonSerializer.Serialize(settings, SerializerOptions);
 
-        var tmp = _paths.SettingsFile + ".tmp";
-        await File.WriteAllTextAsync(tmp, json, ct).ConfigureAwait(false);
-        File.Move(tmp, _paths.SettingsFile, overwrite: true);
+            var tmp = _paths.SettingsFile + $".tmp-{Guid.NewGuid():N}";
+            await File.WriteAllTextAsync(tmp, json, ct).ConfigureAwait(false);
+            MoveWithRetry(tmp, _paths.SettingsFile);
 
-        _current = settings.Clone();
-        _log.Debug("Saved settings to {Path}", _paths.SettingsFile);
+            _current = settings.Clone();
+            _log.Debug("Saved settings to {Path}", _paths.SettingsFile);
+        }
+        finally
+        {
+            _writeLock.Release();
+        }
+
         Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+    private static void MoveWithRetry(string source, string destination)
+    {
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                File.Move(source, destination, overwrite: true);
+                return;
+            }
+            catch (IOException) when (attempt < 5)
+            {
+                Thread.Sleep(60 * attempt); // brief AV / indexer lock on the target
+            }
+            catch
+            {
+                try { File.Delete(source); } catch { /* leave the stray temp */ }
+                throw;
+            }
+        }
     }
 
     private void TryWrite(AppSettings settings)

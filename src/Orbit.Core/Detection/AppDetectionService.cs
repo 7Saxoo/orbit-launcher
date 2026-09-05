@@ -1,4 +1,5 @@
 using Orbit.Core.Data;
+using Orbit.Core.Identification;
 using Orbit.Core.Infrastructure;
 using Orbit.Core.Models;
 using Orbit.Core.Services;
@@ -59,7 +60,8 @@ public sealed class AppDetectionService : IAppDetectionService
             if (_inspector.Evaluate(path) != AppAvailability.Available)
                 continue;
 
-            kept.Add(app with { ExecutablePath = path });
+            var category = CategoryClassifier.Classify(app.Name, app.Publisher, path, app.Kind);
+            kept.Add(app with { ExecutablePath = path, Category = category });
         }
 
         kept.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.CurrentCultureIgnoreCase));

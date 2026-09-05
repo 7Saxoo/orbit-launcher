@@ -65,22 +65,10 @@
             <Border Style="{StaticResource Card}" Margin="0,0,0,14">
                 <StackPanel>
                     <TextBlock Text="Fenêtre" Style="{StaticResource Text.H2}" />
+                    <TextBlock Style="{StaticResource Text.Caption}" Margin="0,6,0,0" TextWrapping="Wrap"
+                               Text="Orbit s'ouvre à la taille de l'écran ; vous pouvez ensuite la redimensionner librement." />
 
-                    <Grid Margin="0,12,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="Taille de la fenêtre" />
-                            <TextBlock Text="Appliquée immédiatement" Style="{StaticResource Text.Caption}" />
-                        </StackPanel>
-                        <ComboBox Grid.Column="1" Width="190" Style="{StaticResource ComboBox.Base}"
-                                  ItemsSource="{Binding WindowSizeOptions}" SelectedItem="{Binding SelectedWindowSize}"
-                                  ItemTemplate="{StaticResource LabelOnly}" />
-                    </Grid>
-
-                    <CheckBox Margin="0,16,0,0" IsChecked="{Binding MinimizeToTrayOnClose}"
+                    <CheckBox Margin="0,14,0,0" IsChecked="{Binding MinimizeToTrayOnClose}"
                               Content="Réduire dans la zone de notification à la fermeture" />
                     <TextBlock Style="{StaticResource Text.Caption}" Margin="27,3,0,0" TextWrapping="Wrap"
                                Text="Activé : fermer la fenêtre garde Orbit en arrière-plan (consommation réduite). Désactivé : fermer la fenêtre quitte l'application." />

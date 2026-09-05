@@ -7,9 +7,56 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance vm:AppTileViewModel}"
              d:DesignWidth="300">
+    <UserControl.Resources>
+        <Style x:Key="TileIconButton" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Secondary}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent" Padding="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="TileStarButton" TargetType="ToggleButton">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="Content" Value="&#x2606;" />
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Secondary}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border Background="Transparent" Padding="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+                </Trigger>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Content" Value="&#x2605;" />
+                    <Setter Property="Foreground" Value="{DynamicResource Brush.Warning}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
     <Border x:Name="Root" Margin="0,0,14,14" Padding="0"
             HorizontalAlignment="Stretch" VerticalAlignment="Top"
-            ClipToBounds="True" RenderTransformOrigin="0.5,0.5">
+            RenderTransformOrigin="0.5,0.5">
         <Border.RenderTransform>
             <TranslateTransform Y="0" />
         </Border.RenderTransform>
@@ -23,10 +70,8 @@
                                 <Storyboard>
                                     <DoubleAnimation
                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                        To="-4" Duration="0:0:0.13">
-                                        <DoubleAnimation.EasingFunction>
-                                            <CubicEase EasingMode="EaseOut" />
-                                        </DoubleAnimation.EasingFunction>
+                                        To="-3" Duration="0:0:0.11">
+                                        <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut" /></DoubleAnimation.EasingFunction>
                                     </DoubleAnimation>
                                 </Storyboard>
                             </BeginStoryboard>
@@ -36,10 +81,8 @@
                                 <Storyboard>
                                     <DoubleAnimation
                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                        To="0" Duration="0:0:0.16">
-                                        <DoubleAnimation.EasingFunction>
-                                            <CubicEase EasingMode="EaseOut" />
-                                        </DoubleAnimation.EasingFunction>
+                                        To="0" Duration="0:0:0.14">
+                                        <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut" /></DoubleAnimation.EasingFunction>
                                     </DoubleAnimation>
                                 </Storyboard>
                             </BeginStoryboard>
@@ -55,80 +98,39 @@
 
         <StackPanel>
 
-            <!-- Banner -->
-            <Grid Height="112">
-                <Border Background="{DynamicResource Brush.Accent.Soft}" />
-                <Image Width="60" Height="60" VerticalAlignment="Center" HorizontalAlignment="Center"
+            <!-- Banner (top corners rounded to match the card) -->
+            <Grid Height="128">
+                <Border Background="{DynamicResource Brush.Accent.Soft}" CornerRadius="12,12,0,0" />
+                <Image Width="76" Height="76" VerticalAlignment="Center" HorizontalAlignment="Center"
                        Source="{Binding IconPath, Converter={StaticResource IconToImage}}"
                        RenderOptions.BitmapScalingMode="HighQuality" />
 
-                <!-- Selection checkbox (multi-delete mode) -->
                 <CheckBox VerticalAlignment="Top" HorizontalAlignment="Left" Margin="8"
                           IsChecked="{Binding IsSelected}"
                           Visibility="{Binding SelectionMode, Converter={StaticResource BoolToVisibility}}" />
 
-                <!-- Favourite star (normal mode) -->
-                <ToggleButton VerticalAlignment="Top" HorizontalAlignment="Left" Margin="8"
-                              Cursor="Hand" Background="Transparent" BorderThickness="0"
+                <ToggleButton VerticalAlignment="Top" HorizontalAlignment="Left" Margin="6"
+                              Style="{StaticResource TileStarButton}"
                               IsChecked="{Binding IsFavorite, Mode=OneWay}"
                               Command="{Binding ToggleFavoriteCommand}" ToolTip="Favori"
-                              Visibility="{Binding SelectionMode, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}">
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton">
-                            <Setter Property="Content" Value="☆" />
-                            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.OnAccent}" />
-                            <Setter Property="FontSize" Value="17" />
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ToggleButton">
-                                        <Border Background="#33000000" CornerRadius="7" Padding="5,2">
-                                            <ContentPresenter />
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="Content" Value="★" />
-                                    <Setter Property="Foreground" Value="{DynamicResource Brush.Warning}" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
-                </ToggleButton>
+                              Visibility="{Binding SelectionMode, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}" />
 
-                <Button VerticalAlignment="Top" HorizontalAlignment="Right" Margin="8"
-                        Content="⋯" FontSize="17" Cursor="Hand"
-                        Foreground="{DynamicResource Brush.Text.OnAccent}"
+                <Button VerticalAlignment="Top" HorizontalAlignment="Right" Margin="6"
+                        Style="{StaticResource TileIconButton}" Content="⋯"
                         Command="{Binding OpenSettingsCommand}"
                         ToolTip="Paramètres de l'application"
-                        Visibility="{Binding SelectionMode, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="b" Background="#33000000" CornerRadius="7" Padding="7,0,7,4">
-                                <ContentPresenter VerticalAlignment="Center" />
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="b" Property="Background" Value="#55000000" />
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
+                        Visibility="{Binding SelectionMode, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}" />
 
                 <Border VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="8"
                         Background="{DynamicResource Brush.Danger}" CornerRadius="5" Padding="6,2"
                         Visibility="{Binding IsMissing, Converter={StaticResource BoolToVisibility}}">
-                    <TextBlock Text="Introuvable" FontSize="11"
-                               Foreground="{DynamicResource Brush.Text.OnAccent}" />
+                    <TextBlock Text="Introuvable" FontSize="11" Foreground="#FFFFFF" />
                 </Border>
 
                 <Border VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="8"
                         Background="{DynamicResource Brush.Success}" CornerRadius="5" Padding="7,2"
                         Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibility}}">
-                    <TextBlock Text="● En cours" FontSize="11"
-                               Foreground="{DynamicResource Brush.Text.OnAccent}" />
+                    <TextBlock Text="● En cours" FontSize="11" Foreground="#FFFFFF" />
                 </Border>
             </Grid>
 
@@ -146,7 +148,7 @@
                         Visibility="{Binding SelectionMode, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}" />
 
                 <Button Margin="0,12,0,0" Style="{StaticResource Button.Base}"
-                        HorizontalAlignment="Stretch" Content="Sélectionner / retirer"
+                        HorizontalAlignment="Stretch" Content="Cocher / décocher"
                         Command="{Binding ToggleSelectedCommand}"
                         Visibility="{Binding SelectionMode, Converter={StaticResource BoolToVisibility}}" />
             </StackPanel>

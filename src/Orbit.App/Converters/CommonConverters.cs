@@ -52,25 +52,33 @@ public sealed class StringToVisibilityConverter : IValueConverter
 /// </summary>
 public sealed class IconPathToImageConverter : IValueConverter
 {
+    // Decoded once per file (keyed by path + last-write time) and shared by every
+    // tile, so switching tabs / re-filtering never re-decodes an icon.
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, BitmapImage> Cache = new();
+
     private static readonly BitmapImage Default = Load(
-        "pack://application:,,,/Orbit;component/Assets/default-app-icon.png")!;
+        "pack://application:,,,/Orbit;component/Assets/default-app-icon.png", null)!;
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is string path && !string.IsNullOrWhiteSpace(path) && File.Exists(path))
-        {
-            var image = Load(path);
-            if (image is not null)
-                return image;
-        }
+        if (value is not string path || string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            return Default;
 
-        return Default;
+        try
+        {
+            var key = $"{path}|{File.GetLastWriteTimeUtc(path).Ticks}";
+            return Cache.GetOrAdd(key, _ => Load(path, 256) ?? Default);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return Default;
+        }
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         Binding.DoNothing;
 
-    private static BitmapImage? Load(string uri)
+    private static BitmapImage? Load(string uri, int? decodePixelWidth)
     {
         try
         {
@@ -79,6 +87,8 @@ public sealed class IconPathToImageConverter : IValueConverter
             image.UriSource = new Uri(uri, UriKind.Absolute);
             image.CacheOption = BitmapCacheOption.OnLoad;          // read the file now, don't lock it
             image.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+            if (decodePixelWidth is { } w)
+                image.DecodePixelWidth = w;
             image.EndInit();
             image.Freeze();
             return image;

@@ -18,7 +18,7 @@ public class JsonSettingsServiceTests
         Assert.Equal(ThemePreference.Dark, service.Current.Theme);
         Assert.True(service.Current.ConfirmBeforeRemove);
         Assert.True(service.Current.MinimizeToTrayOnClose);
-        Assert.Equal(0.85, service.Current.UiScale);
+        Assert.Equal(1.0, service.Current.UiScale);
         // 0 = "fit to screen on first launch"
         Assert.Equal(0, service.Current.WindowWidth);
         Assert.Equal(0, service.Current.WindowHeight);

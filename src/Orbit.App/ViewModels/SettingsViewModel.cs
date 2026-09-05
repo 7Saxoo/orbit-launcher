@@ -11,7 +11,6 @@ namespace Orbit.App.ViewModels;
 
 /// <summary>A palette choice plus the accent colour shown as a dot in the dropdown.</summary>
 public sealed record ThemeOption(ThemePreference Value, string Label, string Dot);
-public sealed record WindowSizeOption(int Width, int Height, bool Maximized, string Label);
 public sealed record UiScaleOption(double Scale, string Label);
 
 /// <summary>Backs the "Paramètres" page.</summary>
@@ -22,7 +21,6 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly IDialogService _dialogs;
     private readonly ILibraryService _library;
     private readonly DetectionFlow _detectionFlow;
-    private readonly IWindowService _windowService;
     private readonly OrbitPaths _paths;
     private readonly ILogger _log;
 
@@ -34,7 +32,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         IDialogService dialogs,
         ILibraryService library,
         DetectionFlow detectionFlow,
-        IWindowService windowService,
         OrbitPaths paths,
         ILogger log)
     {
@@ -43,14 +40,12 @@ public sealed partial class SettingsViewModel : ObservableObject
         _dialogs = dialogs;
         _library = library;
         _detectionFlow = detectionFlow;
-        _windowService = windowService;
         _paths = paths;
         _log = log.ForContext<SettingsViewModel>();
 
         _selectedTheme = ThemeOptions[0];
         _selectedSort = SortOptions[0];
-        _selectedWindowSize = WindowSizeOptions[0];
-        _selectedUiScale = UiScaleOptions[1];
+        _selectedUiScale = UiScaleOptions[2];
         LoadFromSettings();
     }
 
@@ -76,15 +71,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         new SortOption(LibrarySort.LastLaunched, "Dernier lancement"),
     };
 
-    public IReadOnlyList<WindowSizeOption> WindowSizeOptions { get; } = new[]
-    {
-        new WindowSizeOption(0, 0, false, "Adaptée à l'écran"),
-        new WindowSizeOption(1280, 720, false, "1280 × 720"),
-        new WindowSizeOption(1600, 900, false, "1600 × 900"),
-        new WindowSizeOption(1920, 1080, false, "1920 × 1080"),
-        new WindowSizeOption(0, 0, true, "Maximisée"),
-    };
-
     public IReadOnlyList<UiScaleOption> UiScaleOptions { get; } = new[]
     {
         new UiScaleOption(0.75, "Très compacte"),
@@ -95,7 +81,6 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private ThemeOption _selectedTheme;
     [ObservableProperty] private SortOption _selectedSort;
-    [ObservableProperty] private WindowSizeOption _selectedWindowSize;
     [ObservableProperty] private UiScaleOption _selectedUiScale;
     [ObservableProperty] private bool _confirmBeforeRemove = true;
     [ObservableProperty] private bool _minimizeToTrayOnClose = true;
@@ -228,15 +213,6 @@ public sealed partial class SettingsViewModel : ObservableObject
     partial void OnIgdbClientSecretChanged(string value) => Persist();
     partial void OnSteamGridDbApiKeyChanged(string value) => Persist();
 
-    partial void OnSelectedWindowSizeChanged(WindowSizeOption value)
-    {
-        if (_suppressPersist)
-            return;
-
-        _windowService.ApplySize(value.Width, value.Height, value.Maximized);
-        Persist();
-    }
-
     private void LoadFromSettings()
     {
         _suppressPersist = true;
@@ -250,14 +226,9 @@ public sealed partial class SettingsViewModel : ObservableObject
             IgdbClientId = c.IgdbClientId ?? string.Empty;
             IgdbClientSecret = c.IgdbClientSecret ?? string.Empty;
             SteamGridDbApiKey = c.SteamGridDbApiKey ?? string.Empty;
-            SelectedWindowSize =
-                WindowSizeOptions.FirstOrDefault(o =>
-                    o.Maximized == c.WindowMaximized &&
-                    (c.WindowMaximized || (o.Width == c.WindowWidth && o.Height == c.WindowHeight)))
-                ?? WindowSizeOptions[0];
             SelectedUiScale =
                 UiScaleOptions.FirstOrDefault(o => Math.Abs(o.Scale - c.UiScale) < 0.001)
-                ?? UiScaleOptions[1];
+                ?? UiScaleOptions[2];
         }
         finally
         {
@@ -279,16 +250,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         updated.IgdbClientId = Blank(IgdbClientId);
         updated.IgdbClientSecret = Blank(IgdbClientSecret);
         updated.SteamGridDbApiKey = Blank(SteamGridDbApiKey);
-        if (SelectedWindowSize.Maximized)
-        {
-            updated.WindowMaximized = true;
-        }
-        else
-        {
-            updated.WindowMaximized = false;
-            updated.WindowWidth = SelectedWindowSize.Width;
-            updated.WindowHeight = SelectedWindowSize.Height;
-        }
 
         _ = PersistAsync(updated);
     }

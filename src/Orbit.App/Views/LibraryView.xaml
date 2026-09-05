@@ -23,7 +23,7 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                <TextBlock Text="{Binding Heading}" Style="{StaticResource Text.H1}" />
+                <TextBlock Text="Bibliothèque" Style="{StaticResource Text.H1}" />
                 <TextBlock Style="{StaticResource Text.Caption}" Margin="0,2,0,0">
                     <Run Text="{Binding VisibleCount, Mode=OneWay}" />
                     <Run Text=" élément(s)" />
@@ -31,11 +31,11 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="Catégorie" Style="{StaticResource Text.Caption}"
+                <TextBlock Text="Affichage" Style="{StaticResource Text.Caption}"
                            VerticalAlignment="Center" Margin="0,0,6,0" />
                 <ComboBox Width="180" Style="{StaticResource ComboBox.Base}" Margin="0,0,14,0"
-                          ItemsSource="{Binding Categories}"
-                          SelectedItem="{Binding SelectedCategory}" />
+                          ItemsSource="{Binding ViewOptions}"
+                          SelectedItem="{Binding SelectedView}" />
 
                 <TextBlock Text="Trier par" Style="{StaticResource Text.Caption}"
                            VerticalAlignment="Center" Margin="0,0,6,0" />
@@ -49,30 +49,8 @@
                     </ComboBox.ItemTemplate>
                 </ComboBox>
 
-                <ToggleButton Margin="14,0,0,0" Cursor="Hand" Content="☑  Sélectionner"
-                              IsChecked="{Binding IsSelectionMode}"
-                              VerticalAlignment="Stretch" Padding="14,8"
-                              Foreground="{DynamicResource Brush.Text.Primary}"
-                              FontFamily="{StaticResource Font.Primary}" FontSize="13">
-                    <ToggleButton.Template>
-                        <ControlTemplate TargetType="ToggleButton">
-                            <Border x:Name="b" Background="{DynamicResource Brush.Surface}"
-                                    BorderBrush="{DynamicResource Brush.Control.Border}" BorderThickness="1"
-                                    CornerRadius="9" Padding="{TemplateBinding Padding}">
-                                <ContentPresenter VerticalAlignment="Center" />
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="b" Property="Background" Value="{DynamicResource Brush.Accent}" />
-                                    <Setter Property="Foreground" Value="{DynamicResource Brush.Text.OnAccent}" />
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="b" Property="BorderBrush" Value="{DynamicResource Brush.Accent}" />
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </ToggleButton.Template>
-                </ToggleButton>
+                <Button Margin="14,0,0,0" Command="{Binding ToggleSelectionModeCommand}"
+                        Style="{StaticResource Button.Base}" Content="☑  Sélectionner" />
             </StackPanel>
         </Grid>
 
@@ -86,8 +64,14 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock VerticalAlignment="Center"
-                           Text="{Binding SelectedCount, StringFormat='{}{0} application(s) sélectionnée(s) — cochez les cartes à retirer'}" />
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock VerticalAlignment="Center" Margin="0,0,14,0"
+                               Text="{Binding SelectedCount, StringFormat='{}{0} sélectionnée(s)'}" />
+                    <Button Content="Tout cocher" Style="{StaticResource Button.Ghost}"
+                            Command="{Binding SelectAllVisibleCommand}" />
+                    <Button Content="Tout décocher" Style="{StaticResource Button.Ghost}"
+                            Command="{Binding SelectNoneCommand}" />
+                </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                     <Button Content="Annuler" Style="{StaticResource Button.Ghost}" Margin="0,0,10,0"
                             Command="{Binding ToggleSelectionModeCommand}" />
@@ -117,19 +101,18 @@
 
             <!-- Empty state -->
             <Border Style="{StaticResource Card}" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    MaxWidth="420" Padding="28"
+                    Width="340" Padding="26"
                     Visibility="{Binding ShowEmptyState, Converter={StaticResource BoolToVisibility}}">
                 <StackPanel>
                     <TextBlock Text="Rien à afficher" Style="{StaticResource Text.H2}"
                                HorizontalAlignment="Center" />
                     <TextBlock Text="{Binding EmptyStateMessage}" Style="{StaticResource Text.Caption}"
-                               TextAlignment="Center" Margin="0,8,0,16" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button Content="＋  Ajouter une application" Style="{StaticResource Button.Accent}"
-                                Command="{Binding AddCommand}" />
-                        <Button Content="🔍  Analyser mon PC" Style="{StaticResource Button.Base}"
-                                Margin="10,0,0,0" Command="{Binding ScanForAppsCommand}" />
-                    </StackPanel>
+                               TextAlignment="Center" Margin="0,8,0,18" TextWrapping="Wrap" />
+                    <Button Content="＋  Ajouter une application" Style="{StaticResource Button.Accent}"
+                            HorizontalAlignment="Stretch" Command="{Binding AddCommand}" />
+                    <Button Content="🔍  Analyser mon PC" Style="{StaticResource Button.Base}"
+                            HorizontalAlignment="Stretch" Margin="0,10,0,0"
+                            Command="{Binding ScanForAppsCommand}" />
                 </StackPanel>
             </Border>
 

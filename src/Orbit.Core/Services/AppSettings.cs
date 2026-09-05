@@ -44,7 +44,7 @@ public sealed class AppSettings
     public bool MinimizeToTrayOnClose { get; set; } = true;
 
     /// <summary>Global interface scale (0.7–1.3). 0.85 = compact, 1.0 = normal, 1.15 = large.</summary>
-    public double UiScale { get; set; } = 0.85;
+    public double UiScale { get; set; } = 1.0;
 
     // ---- Optional online identification credentials (see Identification/) ----
     public string? IgdbClientId { get; set; }

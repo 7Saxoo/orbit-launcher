@@ -4,10 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Orbit.App.ViewModels"
-        xmlns:inf="clr-namespace:Orbit.App.Infrastructure"
+        xmlns:views="clr-namespace:Orbit.App.Views"
         mc:Ignorable="d"
         Title="Orbit — Centralisateur d'applications et de jeux"
-        Height="780" Width="1280" MinHeight="560" MinWidth="940"
+        Height="780" Width="1280" MinHeight="560" MinWidth="900"
         WindowStartupLocation="Manual"
         Background="{DynamicResource Brush.Window.Background}"
         TextOptions.TextFormattingMode="Ideal"
@@ -16,8 +16,8 @@
     <Window.Resources>
         <Style x:Key="NavGlyph" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="{StaticResource Font.Icons}" />
-            <Setter Property="FontSize" Value="14" />
-            <Setter Property="Width" Value="22" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Width" Value="24" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="TextAlignment" Value="Left" />
         </Style>
@@ -36,7 +36,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="236" />
+            <ColumnDefinition Width="222" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -66,11 +66,11 @@
                                Foreground="{DynamicResource Brush.Text.Primary}" />
                 </StackPanel>
 
-                <StackPanel DockPanel.Dock="Bottom" Margin="6,8,6,10">
+                <StackPanel DockPanel.Dock="Bottom" Margin="8,8,8,10">
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Settings}"
-                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Settings}">
+                                 IsChecked="{Binding IsSettings, Mode=OneWay}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Style="{StaticResource NavGlyph}" Text="&#xE713;" />
                             <TextBlock Text="Paramètres" VerticalAlignment="Center" />
@@ -78,11 +78,11 @@
                     </RadioButton>
                 </StackPanel>
 
-                <StackPanel Margin="6,2,6,8">
+                <StackPanel Margin="8,2,8,8">
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Home}"
-                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Home}">
+                                 IsChecked="{Binding IsHome, Mode=OneWay}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Style="{StaticResource NavGlyph}" Text="&#xE80F;" />
                             <TextBlock Text="Accueil" VerticalAlignment="Center" />
@@ -92,7 +92,7 @@
                     <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="{x:Static vm:NavigationSection.Library}"
-                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Library}">
+                                 IsChecked="{Binding IsLibrary, Mode=OneWay}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -105,57 +105,6 @@
                                        Text="{Binding Home.TotalCount}" />
                         </Grid>
                     </RadioButton>
-
-                    <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
-                                 Command="{Binding NavigateCommand}"
-                                 CommandParameter="{x:Static vm:NavigationSection.Games}"
-                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Games}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Style="{StaticResource NavGlyph}" Text="&#xE7FC;" />
-                            <TextBlock Grid.Column="1" Text="Jeux" VerticalAlignment="Center" />
-                            <TextBlock Grid.Column="2" Style="{StaticResource NavCount}"
-                                       Text="{Binding Home.GamesCount}" />
-                        </Grid>
-                    </RadioButton>
-
-                    <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
-                                 Command="{Binding NavigateCommand}"
-                                 CommandParameter="{x:Static vm:NavigationSection.Applications}"
-                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Applications}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Style="{StaticResource NavGlyph}" Text="&#xE71D;" />
-                            <TextBlock Grid.Column="1" Text="Applications" VerticalAlignment="Center" />
-                            <TextBlock Grid.Column="2" Style="{StaticResource NavCount}"
-                                       Text="{Binding Home.ApplicationsCount}" />
-                        </Grid>
-                    </RadioButton>
-
-                    <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
-                                 Command="{Binding NavigateCommand}"
-                                 CommandParameter="{x:Static vm:NavigationSection.Favorites}"
-                                 IsChecked="{Binding CurrentSection, Mode=OneWay, Converter={StaticResource EnumEquals}, ConverterParameter=Favorites}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Style="{StaticResource NavGlyph}" Text="&#xE734;" />
-                            <TextBlock Grid.Column="1" Text="Favoris" VerticalAlignment="Center" />
-                            <TextBlock Grid.Column="2" Style="{StaticResource NavCount}"
-                                       Text="{Binding Home.FavoritesCount}" />
-                        </Grid>
-                    </RadioButton>
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -163,26 +112,43 @@
         <!-- ==================== Content ==================== -->
         <DockPanel Grid.Column="1" LastChildFill="True">
 
-            <Border DockPanel.Dock="Top" Padding="28,20,28,14">
+            <Border DockPanel.Dock="Top" Padding="26,16,26,12">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0" MinWidth="320" MaxWidth="560" Margin="0,0,24,0"
-                          HorizontalAlignment="Stretch"
-                          Visibility="{Binding IsSearchVisible, Converter={StaticResource BoolToVisibility}}">
+                    <!-- Search (Bibliothèque only) -->
+                    <Grid Grid.Column="0" Width="360" HorizontalAlignment="Left"
+                          Visibility="{Binding IsLibrary, Converter={StaticResource BoolToVisibility}}">
                         <TextBox x:Name="SearchBox" Style="{StaticResource TextBox.Base}"
-                                 Padding="34,10,12,10" FontSize="13"
+                                 Padding="32,7,10,7"
                                  Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, Delay=150}" />
-                        <TextBlock Text="&#xE721;" FontFamily="{StaticResource Font.Icons}" FontSize="13"
-                                   IsHitTestVisible="False" Margin="13,0,0,0" VerticalAlignment="Center"
+                        <TextBlock Text="&#xE721;" FontFamily="{StaticResource Font.Icons}" FontSize="12"
+                                   IsHitTestVisible="False" Margin="11,0,0,0"
+                                   HorizontalAlignment="Left" VerticalAlignment="Center"
                                    Foreground="{DynamicResource Brush.Text.Secondary}" />
-                        <TextBlock Text="Rechercher une application ou un jeu…" IsHitTestVisible="False"
-                                   Margin="34,0,0,0" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource Brush.Text.Secondary}"
-                                   Visibility="{Binding Text, ElementName=SearchBox, Converter={StaticResource StringToVisibility}, ConverterParameter=invert}" />
+                        <TextBlock IsHitTestVisible="False" Text="Rechercher…"
+                                   Margin="32,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource Brush.Text.Secondary}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsKeyboardFocused, ElementName=SearchBox}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Text, ElementName=SearchBox, Converter={StaticResource StringToVisibility}}" Value="Visible">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </Grid>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
@@ -206,7 +172,7 @@
             </Border>
 
             <!-- Bottom bar -->
-            <Border DockPanel.Dock="Bottom" Padding="28,9"
+            <Border DockPanel.Dock="Bottom" Padding="26,8"
                     Background="{DynamicResource Brush.NavRail.Background}"
                     BorderBrush="{DynamicResource Brush.Surface.Border}" BorderThickness="0,1,0,0">
                 <Grid>
@@ -216,16 +182,24 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Style="{StaticResource Text.Caption}"
-                               Text="Orbit v1.8.1 · developed by Saxo" />
+                               Text="Orbit v2.0.0 · developed by Saxo" />
                     <TextBlock Grid.Column="1" Style="{StaticResource Text.Caption}" Margin="16,0,0,0"
                                Text="{Binding StatusMessage}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Column="2" Style="{StaticResource Text.Caption}"
                                Foreground="{DynamicResource Brush.Success}"
-                               Text="● Détection automatique disponible" />
+                               Text="● Détection automatique" />
                 </Grid>
             </Border>
 
-            <inf:FadeContentControl Content="{Binding CurrentContent}" ClipToBounds="True" />
+            <!-- All three views stay alive; navigation only toggles visibility. -->
+            <Grid>
+                <views:HomeView DataContext="{Binding Home}"
+                                Visibility="{Binding DataContext.IsHome, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}" />
+                <views:LibraryView DataContext="{Binding Library}"
+                                   Visibility="{Binding DataContext.IsLibrary, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}" />
+                <views:SettingsView DataContext="{Binding Settings}"
+                                    Visibility="{Binding DataContext.IsSettings, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}" />
+            </Grid>
         </DockPanel>
     </Grid>
 </Window>

@@ -138,7 +138,6 @@ public partial class App : Application
                 services.AddSingleton<MainViewModel>();
 
                 services.AddSingleton<MainWindow>();
-                services.AddSingleton<IWindowService>(sp => sp.GetRequiredService<MainWindow>());
             })
             .Build();
 

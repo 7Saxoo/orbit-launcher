@@ -62,13 +62,21 @@ chemin, quelques métadonnées et une icône mise en cache.
 - **Détection des exécutables manquants** : une entrée dont le fichier n'existe
   plus est signalée clairement et n'est jamais supprimée automatiquement ; on peut
   corriger le chemin en un clic.
+- **Catégorisation automatique** : à la détection et à l'ajout,
+  `CategoryClassifier` déduit une catégorie (Navigateur, Développement,
+  Multimédia, Communication, Bureautique, Utilitaires, Jeux…) depuis le nom,
+  l'éditeur et le chemin.
+- **Navigation** minimale : *Accueil · Bibliothèque · Paramètres*. Dans la
+  bibliothèque, un seul filtre **« Affichage »** — *Tout / Favoris / Jeux /
+  Applications / &lt;catégorie&gt;* — remplace les anciens onglets.
 - **Recherche** instantanée (nom, catégorie, description).
-- **Filtres** par section (Bibliothèque / Jeux / Applications / Favoris) et par
-  catégorie.
 - **Tri** par nom, ajout récent, nombre de lancements ou dernier lancement.
-- **Sélection multiple** : le bouton « ☑ Sélectionner » de la bibliothèque coche
-  plusieurs cartes puis les retire d'un coup (les `.exe` ne sont pas supprimés).
+- **Sélection multiple** : « ☑ Sélectionner » ouvre une barre avec *Tout cocher /
+  Tout décocher* et *Supprimer la sélection* (les `.exe` ne sont pas supprimés).
 - **Favoris**.
+- **Affichage net sur tout écran** : `PerMonitorV2` DPI (plus de flou sur les
+  écrans mis à l'échelle). Changement d'onglet **instantané** (les vues restent
+  vivantes). Icônes décodées une fois et mises en cache.
 - **Paramètres de l'application** (menu ⋯ de chaque carte) : modifier, définir
   les options de lancement (arguments, dossier de travail, **lancer en
   administrateur**, **mémoire max Java `-Xmx/-Xms`**), ouvrir l'emplacement,
@@ -80,10 +88,9 @@ chemin, quelques métadonnées et une icône mise en cache.
   tableau de bord ; **barre de titre, barres de défilement, menus, info-bulles
   et boîtes de dialogue** suivent la palette (plus de `MessageBox` Windows) ;
   transitions de section animées.
-- **Fenêtre** : « adaptée à l'écran » au premier lancement, puis taille réglable
-  depuis les paramètres (1280×720, 1600×900, **1920×1080**, maximisée) et
-  mémorisée. **Taille de l'interface** réglable (Très compacte / Compacte /
-  Normale / Grande) — mise à l'échelle globale, appliquée à chaud.
+- **Fenêtre** : Orbit s'ouvre à la **taille de l'écran** à chaque lancement ;
+  redimensionnable librement ensuite. **Taille de l'interface** réglable (Très
+  compacte / Compacte / Normale / Grande) — mise à l'échelle globale, à chaud.
 - **Instance unique** : relancer Orbit ramène la fenêtre existante au premier
   plan au lieu d'ouvrir une seconde fenêtre.
 - **Fermeture → zone de notification** : le bouton *Fermer* garde Orbit en
@@ -111,7 +118,7 @@ chemin, quelques métadonnées et une icône mise en cache.
 | Injection de dépendances | `Microsoft.Extensions.Hosting` / `DependencyInjection` | Composition centralisée. |
 | Journalisation | **Serilog** (`Sinks.File`, `Sinks.Debug`) | Fichiers rotatifs, format lisible. |
 | Zone de notification | **Hardcodet.NotifyIcon.Wpf** | Icône de tray + menu, sans dépendance WinForms. |
-| Tests | **xUnit** | 114 tests unitaires et d'intégration. |
+| Tests | **xUnit** | 128 tests unitaires et d'intégration. |
 
 ---
 
@@ -233,16 +240,16 @@ Orbit.sln
 │   └── Orbit.App/                  # Présentation WPF (net8.0-windows)
 │       ├── App.xaml(.cs)           # Bootstrap : host DI, Serilog, thème, exceptions globales
 │       ├── MainWindow.xaml(.cs)    # Coquille : rail de navigation + contenu + barre d'état
-│       ├── Infrastructure/         # OrbitLogging, ThemeManager (4 palettes),
+│       ├── Infrastructure/         # OrbitLogging, ThemeManager (7 palettes), UiScaleManager,
 │       │                           #   WindowThemeHelper, TrayIconService, PowerManager,
-│       │                           #   SingleInstanceGuard, FadeContentControl
+│       │                           #   SingleInstanceGuard, RunningStateTicker
 │       ├── Converters/             # Convertisseurs de binding
-│       ├── Services/               # DialogService, AddAppFlow, DetectionFlow, IWindowService
+│       ├── Services/               # DialogService, AddAppFlow, DetectionFlow
 │       ├── ViewModels/             # Main, Home, Library, AppTile, Settings,
 │       │                           #   AppSettings, Add, Detection
 │       ├── Views/                  # HomeView, LibraryView, SettingsView, AppTile,
 │       │                           #   AppFormWindow, AppSettingsWindow, DetectionWindow
-│       ├── Resources/              # Themes/Theme.{Light,Dark}{Cool,Warm}.xaml, Controls.xaml
+│       ├── Resources/              # Themes/Theme.{Light,Dark,Blue,Amber,Violet,Green}.xaml, Controls.xaml
 │       └── Assets/                 # orbit.ico, orbit-mark.png, default-app-icon.png, Fonts/
 │
 ├── installer/                     # Orbit.iss (Inno Setup) + build-installer.ps1
@@ -307,7 +314,7 @@ d'installation, qui peut être en lecture seule) :
 dotnet test
 ```
 
-**114 tests** (xUnit), notamment :
+**128 tests** (xUnit), notamment :
 
 - **`PathHelperTests`** — normalisation (guillemets, espaces, variables
   d'environnement, accents), comparaison de chemins insensible à la casse et au
@@ -334,7 +341,7 @@ dotnet test
   fichier → correction du chemin → lancement ; et réinitialisation qui n'altère
   jamais le `.exe` source.
 
-Résultat de la dernière exécution : **114 réussis, 0 échec**.
+Résultat de la dernière exécution : **128 réussis, 0 échec**.
 
 En complément, l'application a été **réellement démarrée** (build Release) :
 création de `orbit.db` + migration, écriture de `settings.json`, initialisation de

@@ -4,7 +4,9 @@ using System.ComponentModel;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Orbit.App.Infrastructure;
 using Orbit.App.Services;
+using Orbit.Core.Models;
 using Orbit.Core.Services;
 using Serilog;
 
@@ -13,17 +15,22 @@ namespace Orbit.App.ViewModels;
 public sealed record SortOption(LibrarySort Value, string Label);
 
 /// <summary>
-/// Shared view-model for the Bibliothèque / Jeux / Applications / Favoris
-/// sections. A single tile collection is filtered and sorted through a
-/// <see cref="ListCollectionView"/>; navigation just flips <see cref="FilterMode"/>.
+/// Backs the "Bibliothèque" section. One tile collection, filtered through a
+/// single "Affichage" picker (Tout / Favoris / Jeux / Applications / a category)
+/// plus the shared search box, and sorted through a <see cref="ListCollectionView"/>.
 /// </summary>
 public sealed partial class LibraryViewModel : ObservableObject
 {
+    public const string ViewAll = "Tout";
+    public const string ViewFavorites = "Favoris";
+    public const string ViewGames = "Jeux";
+    public const string ViewApplications = "Applications";
+
     private readonly ILibraryService _library;
     private readonly AppTileContext _tileContext;
     private readonly AddAppFlow _addAppFlow;
     private readonly DetectionFlow _detectionFlow;
-    private readonly Orbit.App.Infrastructure.RunningStateTicker _runningTicker;
+    private readonly RunningStateTicker _runningTicker;
     private readonly ILogger _log;
     private readonly ListCollectionView _view;
     private bool _trackingRunning;
@@ -33,7 +40,7 @@ public sealed partial class LibraryViewModel : ObservableObject
         AppTileContext tileContext,
         AddAppFlow addAppFlow,
         DetectionFlow detectionFlow,
-        Orbit.App.Infrastructure.RunningStateTicker runningTicker,
+        RunningStateTicker runningTicker,
         ILogger log)
     {
         _library = library;
@@ -52,7 +59,6 @@ public sealed partial class LibraryViewModel : ObservableObject
     }
 
     public ObservableCollection<AppTileViewModel> Items { get; } = new();
-
     public ICollectionView ItemsView => _view;
 
     public IReadOnlyList<SortOption> SortOptions { get; } = new[]
@@ -63,49 +69,29 @@ public sealed partial class LibraryViewModel : ObservableObject
         new SortOption(LibrarySort.LastLaunched, "Dernier lancement"),
     };
 
-    public ObservableCollection<string> Categories { get; } = new() { AllCategories };
+    /// <summary>Tout · Favoris · Jeux · Applications · &lt;each real category&gt;.</summary>
+    public ObservableCollection<string> ViewOptions { get; } =
+        new() { ViewAll, ViewFavorites, ViewGames, ViewApplications };
 
-    private const string AllCategories = "Toutes les catégories";
-
-    [ObservableProperty] private LibraryFilterMode _filterMode = LibraryFilterMode.All;
+    [ObservableProperty] private string _selectedView = ViewAll;
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private SortOption _selectedSort;
-    [ObservableProperty] private string _selectedCategory = AllCategories;
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private bool _hasLoadedOnce;
     [ObservableProperty] private bool _isSelectionMode;
 
     public int SelectedCount => Items.Count(t => t.IsSelected);
     public bool HasSelection => SelectedCount > 0;
-
     public int VisibleCount => _view.Count;
-
     public bool ShowEmptyState => HasLoadedOnce && !IsLoading && VisibleCount == 0;
 
-    public string Heading => FilterMode switch
-    {
-        LibraryFilterMode.Games => "Jeux",
-        LibraryFilterMode.Applications => "Applications",
-        LibraryFilterMode.Favorites => "Favoris",
-        _ => "Bibliothèque"
-    };
-
-    public string EmptyStateMessage
-    {
-        get
-        {
-            if (!string.IsNullOrWhiteSpace(SearchText))
-                return $"Aucun résultat pour « {SearchText} ».";
-
-            return FilterMode switch
-            {
-                LibraryFilterMode.Games => "Aucun jeu pour le moment. Ajoutez un .exe pour commencer.",
-                LibraryFilterMode.Applications => "Aucune application pour le moment. Ajoutez un .exe pour commencer.",
-                LibraryFilterMode.Favorites => "Aucun favori. Cliquez sur l'étoile d'une carte pour l'ajouter ici.",
-                _ => "Votre bibliothèque est vide. Utilisez « Ajouter » pour enregistrer un .exe."
-            };
-        }
-    }
+    public string EmptyStateMessage =>
+        !string.IsNullOrWhiteSpace(SearchText) ? $"Aucun résultat pour « {SearchText} »." :
+        SelectedView == ViewFavorites ? "Aucun favori. Cliquez sur l'étoile d'une carte pour l'ajouter ici." :
+        SelectedView == ViewGames ? "Aucun jeu. Ajoutez un .exe ou lancez l'analyse du PC." :
+        SelectedView == ViewApplications ? "Aucune application. Ajoutez un .exe ou lancez l'analyse du PC." :
+        SelectedView != ViewAll ? $"Aucun élément dans « {SelectedView} »." :
+        "Votre bibliothèque est vide. Utilisez « Ajouter » ou « Analyser mon PC ».";
 
     public async Task RefreshAsync()
     {
@@ -126,8 +112,7 @@ public sealed partial class LibraryViewModel : ObservableObject
                 Items.Add(tile);
             }
             NotifySelection();
-
-            RebuildCategories();
+            RebuildViewOptions();
             HasLoadedOnce = true;
 
             if (!_trackingRunning)
@@ -136,7 +121,7 @@ public sealed partial class LibraryViewModel : ObservableObject
                 _runningTicker.Track(() => Items);
             }
 
-            _log.Debug("Library view refreshed: {Count} entries", Items.Count);
+            _log.Debug("Library refreshed: {Count} entries", Items.Count);
         }
         catch (Exception ex)
         {
@@ -155,9 +140,7 @@ public sealed partial class LibraryViewModel : ObservableObject
     [RelayCommand]
     private async Task AddAsync()
     {
-        var defaultKind = FilterMode == LibraryFilterMode.Games
-            ? Orbit.Core.Models.AppKind.Game
-            : (Orbit.Core.Models.AppKind?)null;
+        var defaultKind = SelectedView == ViewGames ? AppKind.Game : (AppKind?)null;
 
         var outcome = await _addAppFlow.RunAsync(defaultKind).ConfigureAwait(true);
         if (!outcome.ChangedLibrary)
@@ -187,6 +170,18 @@ public sealed partial class LibraryViewModel : ObservableObject
 
     [RelayCommand]
     private void ToggleSelectionMode() => IsSelectionMode = !IsSelectionMode;
+
+    [RelayCommand]
+    private void SelectAllVisible() => SetVisibleSelection(true);
+
+    [RelayCommand]
+    private void SelectNone() => SetVisibleSelection(false);
+
+    private void SetVisibleSelection(bool selected)
+    {
+        foreach (var tile in _view.Cast<AppTileViewModel>())
+            tile.IsSelected = selected;
+    }
 
     [RelayCommand(CanExecute = nameof(HasSelection))]
     private async Task DeleteSelectedAsync()
@@ -227,6 +222,26 @@ public sealed partial class LibraryViewModel : ObservableObject
         NotifySelection();
     }
 
+    partial void OnSearchTextChanged(string value)
+    {
+        _view.Refresh();
+        NotifyCounts();
+    }
+
+    partial void OnSelectedViewChanged(string value)
+    {
+        _view.Refresh();
+        NotifyCounts();
+    }
+
+    partial void OnSelectedSortChanged(SortOption value)
+    {
+        _view.CustomSort = BuildComparer(value?.Value ?? LibrarySort.Name);
+        _view.Refresh();
+    }
+
+    partial void OnIsLoadingChanged(bool value) => OnPropertyChanged(nameof(ShowEmptyState));
+
     private void OnTilePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(AppTileViewModel.IsSelected))
@@ -240,26 +255,6 @@ public sealed partial class LibraryViewModel : ObservableObject
         DeleteSelectedCommand.NotifyCanExecuteChanged();
     }
 
-    partial void OnSearchTextChanged(string value) => _view.Refresh();
-
-    partial void OnFilterModeChanged(LibraryFilterMode value)
-    {
-        _view.Refresh();
-        OnPropertyChanged(nameof(Heading));
-        OnPropertyChanged(nameof(EmptyStateMessage));
-        NotifyCounts();
-    }
-
-    partial void OnSelectedCategoryChanged(string value) => _view.Refresh();
-
-    partial void OnSelectedSortChanged(SortOption value)
-    {
-        _view.CustomSort = BuildComparer(value?.Value ?? LibrarySort.Name);
-        NotifyCounts();
-    }
-
-    partial void OnIsLoadingChanged(bool value) => OnPropertyChanged(nameof(ShowEmptyState));
-
     private void NotifyCounts()
     {
         OnPropertyChanged(nameof(VisibleCount));
@@ -272,21 +267,16 @@ public sealed partial class LibraryViewModel : ObservableObject
         if (obj is not AppTileViewModel tile)
             return false;
 
-        var matchesMode = FilterMode switch
+        var matchesView = SelectedView switch
         {
-            LibraryFilterMode.Games => tile.Entry.Kind == Orbit.Core.Models.AppKind.Game,
-            LibraryFilterMode.Applications => tile.Entry.Kind == Orbit.Core.Models.AppKind.Application,
-            LibraryFilterMode.Favorites => tile.IsFavorite,
-            _ => true
+            ViewAll => true,
+            ViewFavorites => tile.IsFavorite,
+            ViewGames => tile.Entry.Kind == AppKind.Game,
+            ViewApplications => tile.Entry.Kind == AppKind.Application,
+            _ => string.Equals(tile.Entry.Category, SelectedView, StringComparison.CurrentCultureIgnoreCase),
         };
-        if (!matchesMode)
+        if (!matchesView)
             return false;
-
-        if (SelectedCategory != AllCategories &&
-            !string.Equals(tile.Entry.Category, SelectedCategory, StringComparison.CurrentCultureIgnoreCase))
-        {
-            return false;
-        }
 
         if (string.IsNullOrWhiteSpace(SearchText))
             return true;
@@ -301,11 +291,11 @@ public sealed partial class LibraryViewModel : ObservableObject
         !string.IsNullOrEmpty(haystack) &&
         haystack.Contains(needle, StringComparison.CurrentCultureIgnoreCase);
 
-    private void RebuildCategories()
+    private void RebuildViewOptions()
     {
-        var previous = SelectedCategory;
+        var previous = SelectedView;
 
-        var distinct = Items
+        var categories = Items
             .Select(t => t.Entry.Category)
             .Where(c => !string.IsNullOrWhiteSpace(c))
             .Select(c => c.Trim())
@@ -313,12 +303,17 @@ public sealed partial class LibraryViewModel : ObservableObject
             .OrderBy(c => c, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
 
-        Categories.Clear();
-        Categories.Add(AllCategories);
-        foreach (var category in distinct)
-            Categories.Add(category);
+        ViewOptions.Clear();
+        ViewOptions.Add(ViewAll);
+        ViewOptions.Add(ViewFavorites);
+        ViewOptions.Add(ViewGames);
+        ViewOptions.Add(ViewApplications);
+        foreach (var category in categories)
+            ViewOptions.Add(category);
 
-        SelectedCategory = Categories.Contains(previous) ? previous : AllCategories;
+        SelectedView = ViewOptions.Contains(previous, StringComparer.CurrentCultureIgnoreCase)
+            ? previous
+            : ViewAll;
     }
 
     private static System.Collections.IComparer BuildComparer(LibrarySort sort) => new TileComparer(sort);

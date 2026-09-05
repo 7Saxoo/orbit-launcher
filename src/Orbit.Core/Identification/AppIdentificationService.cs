@@ -55,8 +55,12 @@ public sealed class AppIdentificationService : IAppIdentificationService
             };
         }
 
-        _log.Information("Identified {File} as {Kind} '{Name}' ({Score:P0}, {Source})",
-            signals.FileName, best.Kind, best.Name, best.Confidence, best.Source);
-        return best;
+        // Refine a generic "Applications" into a concrete category.
+        var category = CategoryClassifier.Classify(
+            best.Name, best.Publisher, signals.NormalizedPath, best.ToAppKind());
+
+        _log.Information("Identified {File} as {Kind} '{Name}' [{Category}] ({Score:P0}, {Source})",
+            signals.FileName, best.Kind, best.Name, category, best.Confidence, best.Source);
+        return best with { SuggestedCategory = category };
     }
 }
